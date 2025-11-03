@@ -1,8 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "VoxelGameGameMode.h"
-#include "VoxelGameCharacter.h"
-#include "VG_PC_ThirdPersonController.h"
+#include "Character/VoxelGameCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 AVoxelGameGameMode::AVoxelGameGameMode()
@@ -12,5 +11,5 @@ AVoxelGameGameMode::AVoxelGameGameMode()
 	if (PlayerPawnBPClass.Class != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
-	};
+	}
 }

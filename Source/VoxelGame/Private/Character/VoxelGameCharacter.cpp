@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "VoxelGameCharacter.h"
+#include "Character/VoxelGameCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -52,6 +52,18 @@ AVoxelGameCharacter::AVoxelGameCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	// Zoom constraints
+	ZoomConstraints = FVector2D(200.f, 600.f);
+
+	// Stats
+	Strength              = 1.0f;
+	Defense               = 0.0f;
+	Agility               = 1.0f;
+	Luck                  = 1.0f;
+	AttackArea            = 100.0f;
+	SkillDuration         = 1.0f;
+	AdditionalProjectiles = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -85,6 +97,9 @@ void AVoxelGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AVoxelGameCharacter::Look);
+
+		// Zooming
+		EnhancedInputComponent->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &AVoxelGameCharacter::Zoom);
 	}
 	else
 	{
@@ -125,5 +140,16 @@ void AVoxelGameCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AVoxelGameCharacter::Zoom(const FInputActionValue& Value)
+{
+	float ZoomDelta = Value.Get<float>();
+
+	if (CameraBoom != nullptr)
+	{
+		float NewTargetArmLength = FMath::Clamp(CameraBoom->TargetArmLength + ZoomDelta, ZoomConstraints.X, ZoomConstraints.Y);
+		CameraBoom->TargetArmLength = NewTargetArmLength;
 	}
 }
