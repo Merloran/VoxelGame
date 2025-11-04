@@ -1,9 +1,9 @@
 #include "Character/HealthComponent.h"
 
 UHealthComponent::UHealthComponent()
-	: maxHealth(100.0f)
-	, currentHealth(maxHealth)
-	, healthRegenerationRate(0.0f)
+	: MaxHealth(100.0f)
+	, CurrentHealth(MaxHealth)
+	, HealthRegenerationRate(0.0f)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -11,7 +11,7 @@ UHealthComponent::UHealthComponent()
 
 void UHealthComponent::BeginPlay()
 {
-	currentHealth = maxHealth;
+	CurrentHealth = MaxHealth;
 	AActor *Owner = GetOwner();
 
 	Owner->OnTakePointDamage.AddDynamic(this, &UHealthComponent::TakeDamage);
@@ -23,7 +23,7 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	currentHealth = FMath::Clamp(currentHealth + healthRegenerationRate * DeltaTime, 0.0f, maxHealth);
+	CurrentHealth = FMath::Clamp(CurrentHealth + HealthRegenerationRate * DeltaTime, 0.0f, MaxHealth);
 }
 
 void UHealthComponent::TakeDamage(AActor *DamagedActor, float Damage, AController *InstigatedBy, FVector HitLocation, UPrimitiveComponent *FHitComponent, FName BoneName, FVector ShotFromDirection, const UDamageType *DamageType, AActor *DamageCauser)
@@ -33,66 +33,66 @@ void UHealthComponent::TakeDamage(AActor *DamagedActor, float Damage, AControlle
 		return;
 	}
 
-	AActor *causer = nullptr;
+	AActor *Causer = nullptr;
 	if (InstigatedBy)
 	{
-		causer = InstigatedBy->GetPawn();
+		Causer = InstigatedBy->GetPawn();
 	}
 
 	if (Damage > 0.0f)
 	{
-		injure(FMath::Abs(Damage), causer);
+		Injure(FMath::Abs(Damage), Causer);
 	}
-	else if (currentHealth != maxHealth) 
+	else if (CurrentHealth != MaxHealth) 
 	{
-		heal(FMath::Abs(Damage), causer);
+		Heal(FMath::Abs(Damage), Causer);
 	}
 
-	if (currentHealth == 0.0f) 
+	if (CurrentHealth == 0.0f) 
 	{
-		on_zero_health(causer);
+		OnZeroHealth(Causer);
 	}
 }
 
-void UHealthComponent::on_zero_health(AActor *causer) const
+void UHealthComponent::OnZeroHealth(AActor *Causer) const
 {
-	onDeath.Broadcast(causer);
+	OnDeath.Broadcast(Causer);
 }
 
-void UHealthComponent::heal(float amount, AActor* causer)
+void UHealthComponent::Heal(float Amount, AActor* Causer)
 {
-	currentHealth = FMath::Clamp(currentHealth + amount, 0.0f, maxHealth);
-	onHeal.Broadcast(causer);
+	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.0f, MaxHealth);
+	OnHeal.Broadcast(Causer);
 }
 
-void UHealthComponent::injure(float amount, AActor* causer)
+void UHealthComponent::Injure(float Amount, AActor* Causer)
 {
-	currentHealth = FMath::Clamp(currentHealth - amount, 0.0f, maxHealth);
-	onInjure.Broadcast(causer);
+	CurrentHealth = FMath::Clamp(CurrentHealth - Amount, 0.0f, MaxHealth);
+	OnInjure.Broadcast(Causer);
 }
 
 void UHealthComponent::InstantKill(AActor *DamagedActor, UPrimitiveComponent *FHitComponent, FVector ShotFromDirection, const UDamageType *DamageType, AActor *DamageCauser)
 {
-	if (currentHealth <= 0.0f)
+	if (CurrentHealth <= 0.0f)
 	{
 		return;
 	}
 
-	currentHealth = 0.0f;
-	on_zero_health(DamageCauser);
+	CurrentHealth = 0.0f;
+	OnZeroHealth(DamageCauser);
 }
 
-float UHealthComponent::get_max_health()
+float UHealthComponent::GetMaxHealth()
 {
-	return maxHealth;
+	return MaxHealth;
 }
 
-float UHealthComponent::get_current_health()
+float UHealthComponent::GetCurrentHealth()
 {
-	return currentHealth;
+	return CurrentHealth;
 }
 
-void UHealthComponent::set_current_health(float value)
+void UHealthComponent::SetCurrentHealth(float Value)
 {
-	currentHealth = value;
+	CurrentHealth = Value;
 }

@@ -2,55 +2,55 @@
 
 
 UExperienceComponent::UExperienceComponent()
-	: ownedExperience(0)
-	, level(0)
+	: OwnedExperience(0)
+	, Level(0)
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	SphereRadius = 32.0f;
+	SphereRadius = 200.0f;
 }
 
-void UExperienceComponent::gain_experience(const int64 experience)
+void UExperienceComponent::GainExperience(const int64 Experience)
 {
-	onGainExperience.Broadcast(experience);
-	ownedExperience += experience;
-	update_level();
+	OnGainExperience.Broadcast(Experience);
+	OwnedExperience += Experience;
+	UpdateLevel();
 }
 
-int64 UExperienceComponent::get_current_experience() const
+int64 UExperienceComponent::GetCurrentExperience() const
 {
-	return ownedExperience;
+	return OwnedExperience;
 }
 
-int32 UExperienceComponent::get_level() const
+int32 UExperienceComponent::GetLevel() const
 {
-	return level;
+	return Level;
 }
 
-void UExperienceComponent::reset_level()
+void UExperienceComponent::ResetLevel()
 {
-	ownedExperience = 0;
-	update_level();
+	OwnedExperience = 0;
+	UpdateLevel();
 }
 
-float UExperienceComponent::get_experience_progress() const
+float UExperienceComponent::GetExperienceProgress() const
 {
-	int64 experienceForCurrentLevel = EXPERIENCE_FOR_FIRST_LEVEL * int64(1) << (level - 1);
-	int64 experienceForNextLevel = EXPERIENCE_FOR_FIRST_LEVEL * int64(1) << level;
+	int64 experienceForCurrentLevel = EXPERIENCE_FOR_FIRST_LEVEL * int64(1) << (Level - 1);
+	int64 experienceForNextLevel = EXPERIENCE_FOR_FIRST_LEVEL * int64(1) << Level;
 
 	if (experienceForNextLevel == experienceForCurrentLevel)
 	{
 		return 1.0f;
 	}
 
-	return float(ownedExperience - experienceForCurrentLevel) / float(experienceForNextLevel - experienceForCurrentLevel);
+	return float(OwnedExperience - experienceForCurrentLevel) / float(experienceForNextLevel - experienceForCurrentLevel);
 }
 
 void UExperienceComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	update_level();
-	
+	UpdateLevel();
+
 	OnComponentBeginOverlap.AddDynamic(this, &UExperienceComponent::OnSphereBeginOverlap);
 }
 
@@ -62,13 +62,13 @@ void UExperienceComponent::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedC
 	}
 }
 
-void UExperienceComponent::update_level()
+void UExperienceComponent::UpdateLevel()
 {
-	int32 previousLevel = level;
-	level = FMath::Log2(double(int64(ownedExperience * 2 / EXPERIENCE_FOR_FIRST_LEVEL)));
+	int32 previousLevel = Level;
+	Level = FMath::Log2(double(int64(OwnedExperience * 2 / EXPERIENCE_FOR_FIRST_LEVEL)));
 
-	if (level > previousLevel)
+	if (Level > previousLevel)
 	{
-		onLevelUp.Broadcast();
+		OnLevelUp.Broadcast();
 	}
 }

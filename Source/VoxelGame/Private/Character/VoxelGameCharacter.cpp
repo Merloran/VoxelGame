@@ -44,7 +44,9 @@ AVoxelGameCharacter::AVoxelGameCharacter()
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
-
+	CameraBoom->bEnableCameraLag = true;
+	CameraBoom->CameraLagSpeed = 10.f;
+	
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
@@ -149,7 +151,7 @@ void AVoxelGameCharacter::Zoom(const FInputActionValue& Value)
 
 	if (CameraBoom != nullptr)
 	{
-		float NewTargetArmLength = FMath::Clamp(CameraBoom->TargetArmLength + ZoomDelta, ZoomConstraints.X, ZoomConstraints.Y);
+		float NewTargetArmLength = FMath::Clamp(CameraBoom->TargetArmLength + ZoomDelta * ZoomSpeed, ZoomConstraints.X, ZoomConstraints.Y);
 		CameraBoom->TargetArmLength = NewTargetArmLength;
 	}
 }

@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath, AActor*, deathCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath, AActor*, DeathCauser);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UHealthComponent : public UActorComponent
@@ -15,32 +15,32 @@ class UHealthComponent : public UActorComponent
 
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
-	FOnDeath onDeath;
+	FOnDeath OnDeath;
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
-	FOnDeath onInjure;
+	FOnDeath OnInjure;
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
-	FOnDeath onHeal;
+	FOnDeath OnHeal;
 
 protected:
 	UPROPERTY(EditAnywhere)
-	float maxHealth;
+	float MaxHealth;
 
 	UPROPERTY(VisibleAnywhere)
-	float currentHealth;
+	float CurrentHealth;
 
 	UPROPERTY(EditAnywhere)
-	float healthRegenerationRate;
+	float HealthRegenerationRate;
 
 public:
 	UHealthComponent();
 
 	UFUNCTION(BlueprintCallable)
-	void heal(float amount, AActor* causer = nullptr);
+	void Heal(float Amount, AActor* Causer = nullptr);
 
 	UFUNCTION(BlueprintCallable)
-	void injure(float amount, AActor* causer = nullptr);
+	void Injure(float Amount, AActor* Causer = nullptr);
 
 	UFUNCTION(BlueprintCallable)
 	void TakeDamage(AActor *DamagedActor, 
@@ -60,17 +60,17 @@ public:
 					 AActor *DamageCauser);
 
 	UFUNCTION(BlueprintCallable)
-	float get_max_health();
+	float GetMaxHealth();
 
 	UFUNCTION(BlueprintCallable)
-	float get_current_health();
+	float GetCurrentHealth();
 
-	void set_current_health(float value);
+	void SetCurrentHealth(float Value);
 
 protected:
 	virtual void BeginPlay() override;
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void on_zero_health(AActor* causer = nullptr) const;		
+	void OnZeroHealth(AActor* Causer = nullptr) const;
 };

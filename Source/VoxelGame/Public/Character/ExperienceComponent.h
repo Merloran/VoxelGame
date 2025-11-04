@@ -9,8 +9,8 @@
 class AActor;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevelUp);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGainExperience, int64, experience);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPickUp, AActor*, pickedActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGainExperience, int64, Experience);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPickUp, AActor*, PickedActor);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UExperienceComponent : public USphereComponent
@@ -18,47 +18,52 @@ class UExperienceComponent : public USphereComponent
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Interaction")
-	FOnLevelUp onLevelUp;
+	FOnLevelUp OnLevelUp;
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Interaction")
-	FOnGainExperience onGainExperience;
-	
+	FOnGainExperience OnGainExperience;
+
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Interaction")
 	FOnPickUp OnPickUp;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Gameplay")
-	int64 ownedExperience;
+	int64 OwnedExperience;
 
 private:
 	static constexpr int64 EXPERIENCE_FOR_FIRST_LEVEL = 100;
-	int32 level;
+	int32 Level;
 
-public:	
+public: 
 	UExperienceComponent();
 
 	UFUNCTION(BlueprintCallable)
-	void gain_experience(const int64 experience);
+	void GainExperience(const int64 Experience);
 
 	UFUNCTION(BlueprintCallable)
-	int64 get_current_experience() const;
+	int64 GetCurrentExperience() const;
 
 	UFUNCTION(BlueprintCallable)
-	int32 get_level() const;
+	int32 GetLevel() const;
 
 	UFUNCTION(BlueprintCallable)
-	float get_experience_progress() const;
+	float GetExperienceProgress() const;
 
 	UFUNCTION(BlueprintCallable)
-	void reset_level();
+	void ResetLevel();
 
 protected:
 	virtual void BeginPlay() override;
-	
+
 	/** Code for when something overlaps this component */
 	UFUNCTION()
-	void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
+                              AActor* OtherActor, 
+                              UPrimitiveComponent* OtherComp, 
+                              int32 OtherBodyIndex, 
+                              bool bFromSweep, 
+                              const FHitResult& SweepResult);
 
 private:
-	void update_level();
+	void UpdateLevel();
 };
