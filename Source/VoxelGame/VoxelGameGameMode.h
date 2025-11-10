@@ -6,7 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "VoxelGameGameMode.generated.h"
 
-UCLASS(minimalapi)
+UCLASS(minimalapi, Blueprintable, BlueprintType)
 class AVoxelGameGameMode : public AGameModeBase
 {
 	GENERATED_BODY()

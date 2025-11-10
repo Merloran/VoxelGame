@@ -16,8 +16,13 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 //////////////////////////////////////////////////////////////////////////
 // AVoxelGameCharacter
 
-AVoxelGameCharacter::AVoxelGameCharacter()
+AVoxelGameCharacter* AVoxelGameCharacter::instance = nullptr;
+
+AVoxelGameCharacter::AVoxelGameCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
+	instance = this;
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 		
