@@ -15,7 +15,7 @@ struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
-UCLASS(config=Game)
+UCLASS(config = Game, Blueprintable, BlueprintType, Placeable)
 class AVoxelGameCharacter : public ACharacter
 {
 	GENERATED_BODY()
@@ -75,7 +75,11 @@ class AVoxelGameCharacter : public ACharacter
 	int32 AdditionalProjectiles;
 
 public:
-	AVoxelGameCharacter();
+	AVoxelGameCharacter(const FObjectInitializer& ObjectInitializer);
+
+	/** VoxelGameCharacter class settings */
+	static AVoxelGameCharacter* instance;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ClassParams", meta = (AllowPrivateAccess = "true"))
 	
 
 protected:
@@ -99,5 +103,11 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+
+	UFUNCTION(BlueprintCallable, Category = "MyHelpers")
+	static AVoxelGameCharacter* GetVoxelGameCharacterInstance() {
+		return instance;
+	}
 };
 
