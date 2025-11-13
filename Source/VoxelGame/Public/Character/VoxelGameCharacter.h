@@ -77,11 +77,6 @@ class AVoxelGameCharacter : public ACharacter
 public:
 	AVoxelGameCharacter(const FObjectInitializer& ObjectInitializer);
 
-	/** VoxelGameCharacter class settings */
-	static AVoxelGameCharacter* instance;
-	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ClassParams", meta = (AllowPrivateAccess = "true"))
-	
-
 protected:
 
 	/** Called for movement input */
@@ -103,11 +98,5 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
-
-	UFUNCTION(BlueprintCallable, Category = "MyHelpers")
-	static AVoxelGameCharacter* GetVoxelGameCharacterInstance() {
-		return instance;
-	}
 };
 
