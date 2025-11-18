@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "MassEntityTypes.h"
 #include "MassCommonFragments.h"
-#include "MassRepresentationFragments.h"
 #include "EnemyFragment.generated.h"
 
 /*
@@ -17,62 +16,46 @@ struct VOXELGAME_API FEnemyFragment : public FMassFragment
     GENERATED_BODY()
 
     UPROPERTY()
-    uint32 Eid;
+    uint32 Id;
     UPROPERTY()
     FVector TargetPosition = FVector::ZeroVector;
     UPROPERTY()
     float MoveSpeed = 200.f;
     UPROPERTY()
     float AttackRange = 200.f;
-};
-
-
-/*
- *
- */
-USTRUCT()
-struct FEnemyStateFragment : public FMassFragment
-{
-    GENERATED_BODY()
-
     UPROPERTY()
-    uint8 bIsAttacking : 1;
-
+    float Damage = 1.f;
     UPROPERTY()
-    uint8 bIsMoving : 1;
+    float AttackCooldown = 1.f;
+    UPROPERTY()
+    float AttackTimer = 0.f;
 };
 
 /*
  *
  */
-USTRUCT()
-struct FEnemyRepresentationFragment : public FMassFragment
-{
-    GENERATED_BODY()
-
-    // Index or ID for which visual template to use
-    int32 VisualType = 0;
-};
+//USTRUCT()
+//struct VOXELGAME_API FEnemyStateFragment : public FMassFragment
+//{
+//    GENERATED_BODY()
+//
+//    UPROPERTY()
+//    uint8 bIsAttacking : 1;
+//
+//    UPROPERTY()
+//    uint8 bIsMoving : 1;
+//};
 
 /*
  * Health fragment - holds current and max HP.
  */
 USTRUCT()
-struct FHealthFragment : public FMassFragment
+struct VOXELGAME_API FHealthFragment : public FMassFragment
 {
     GENERATED_BODY()
 
+    UPROPERTY()
     float Health = 100.f;
+    UPROPERTY()
     float MaxHealth = 100.f;
-};
-
-/*
- * Damage fragment - transient fragment used when something takes a hit.
- */
-USTRUCT()
-struct FDamageFragment : public FMassFragment
-{
-    GENERATED_BODY()
-
-    float DamageAmount = 0.f;
 };

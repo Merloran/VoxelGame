@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "MassProcessor.h"
-#include "MassCommonFragments.h"
+#include "MassEntityTypes.h"
 #include "Enemy/EnemyFragment.h"
 #include "EnemyProcessor.generated.h"
 

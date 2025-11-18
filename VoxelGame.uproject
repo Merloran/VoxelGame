@@ -9,13 +9,21 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"Engine"
+				"Engine",
+				"MassEntity"
 			]
 		}
 	],
 	"Plugins": [
 		{
 			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		},
+		{
+			"Name": "MassGameplay",
 			"Enabled": true,
 			"TargetAllowList": [
 				"Editor"
