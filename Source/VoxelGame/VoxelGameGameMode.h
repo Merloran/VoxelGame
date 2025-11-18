@@ -13,6 +13,7 @@ class AVoxelGameGameMode : public AGameModeBase
 
 public:
 	AVoxelGameGameMode();
+	void BeginPlay();
 };
 
 

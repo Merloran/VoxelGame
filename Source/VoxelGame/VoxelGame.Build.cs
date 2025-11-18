@@ -4,10 +4,28 @@ using UnrealBuildTool;
 
 public class VoxelGame : ModuleRules
 {
-	public VoxelGame(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+    public VoxelGame(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
-	}
+        PublicDependencyModuleNames.AddRange(new string[] {
+            "Core",
+            "CoreUObject",
+            "Engine",
+            "InputCore",
+            "EnhancedInput",
+            
+            // MASS modules
+            "MassCommon",
+            "MassEntity",
+            "MassActors",
+            "MassRepresentation"
+            //"MassRepresentationEditor",
+            //"MassSignals",
+            //"MassMovement",
+            //"MassLOD",
+            //"MassGameplay",
+            //"StructUtils" // Needed for FSharedStruct, shared fragments
+        });
+    }
 }
