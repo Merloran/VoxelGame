@@ -83,7 +83,7 @@ void UEnemySubsystem::SpawnEnemies()
 		FMassEntityHandle Entity = EntityManager->CreateEntity(EnemyArchetype); 
 		//Transform 
 		FTransformFragment& Transform = EntityManager->GetFragmentDataChecked<FTransformFragment>(Entity); 
-		Transform.GetMutableTransform().SetLocation(FVector(FMath::RandRange(-2000, 2000), FMath::RandRange(-2000, 2000), 0));
+		Transform.GetMutableTransform().SetLocation(FVector(FMath::RandRange(50, 2000), FMath::RandRange(0, 3800), 0));
 		// Enemy logic 
 		FEnemyFragment& Enemy = EntityManager->GetFragmentDataChecked<FEnemyFragment>(Entity); 
 		Enemy.Id = i; 
@@ -92,6 +92,9 @@ void UEnemySubsystem::SpawnEnemies()
 		Enemy.AttackRange = 150.f;
 		Enemy.Damage = 1.f;
 		Enemy.AttackCooldown = 1;
+		FHealthFragment &Health = EntityManager->GetFragmentDataChecked<FHealthFragment>(Entity);
+		Health.MaxHealth = 10.f;
+		Health.Health = 10.f;
 		// Mass representation fragment (tells Mass how to visualize)
 		FMassRepresentationFragment& Representation = EntityManager->GetFragmentDataChecked<FMassRepresentationFragment>(Entity); 
 		//Representation.CurrentRepresentation = EMassRepresentationType::StaticMeshInstance; 

@@ -49,6 +49,9 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
 
             const float DeltaTime = Context.GetDeltaTimeSeconds();
 
+            const float radius = 50.f;
+            const float radius2 = 50.f;
+
             for (int32 i = 0; i < NumEntities; ++i)
             {
                 FTransform& Transform = TransformList[i].GetMutableTransform();
@@ -72,6 +75,26 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                     Direction.Normalize();
                     NewPos += Direction * Enemy.MoveSpeed * DeltaTime;
                     Transform.SetLocation(NewPos);
+                }
+
+
+                for (int32 j = 0; j < NumEntities; ++j)
+                {
+                    FEnemyFragment& OtherEnemy = EnemyList[j];
+                    if (Enemy.Id != OtherEnemy.Id)
+                    {
+                        FTransform& OtherTransform = TransformList[j].GetMutableTransform();
+                        FVector OtherPosition = OtherTransform.GetLocation();
+                        FVector Difference = NewPos - OtherPosition;
+                        const float DifferenceDistance = Difference.Size();
+                        Difference.Normalize();
+                        if (DifferenceDistance <= radius2)
+                        {
+                            FVector Delta = 0.55f * (radius2 - DifferenceDistance) * Difference;
+                            NewPos += Delta;
+                            OtherTransform.SetLocation(OtherPosition - Delta);
+                        }
+                    }
                 }
 
                 if (AActor* Actor = ActorFrag.GetMutable())
