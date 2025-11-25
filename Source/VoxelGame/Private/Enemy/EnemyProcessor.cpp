@@ -60,9 +60,16 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 //const FMassRepresentationFragment& Representation = RepresentationList[i];
                 FMassActorFragment& ActorFrag = ActorList[i];
 
-                /* MOVEMENT */
                 FVector Current = Transform.GetLocation();
-                FVector Direction = EnemySubsystem.TargetPosition - Current;
+                int32 TargetIndex = Enemy.Target;
+                /* PLAYER DETECTION */
+                if ((EnemySubsystem.TargetsPositions[EnemySubsystem.PlayerTargetIndex] - Current).Size() <= Enemy.PlayerDetectionRange)
+                {
+                    TargetIndex = EnemySubsystem.PlayerTargetIndex;
+                }
+
+                /* MOVEMENT */
+                FVector Direction = EnemySubsystem.TargetsPositions[TargetIndex] - Current;
                 Direction.Z = 0.0f;
                 //FVector Direction = Enemy.TargetPosition - Current;
                 const float Distance = Direction.Size();
@@ -81,7 +88,7 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 for (int32 j = 0; j < NumEntities; ++j)
                 {
                     FEnemyFragment& OtherEnemy = EnemyList[j];
-                    if (Enemy.Id != OtherEnemy.Id)
+                    if (i != j)
                     {
                         FTransform& OtherTransform = TransformList[j].GetMutableTransform();
                         FVector OtherPosition = OtherTransform.GetLocation();
@@ -92,6 +99,7 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                         {
                             FVector Delta = 0.55f * (radius2 - DifferenceDistance) * Difference;
                             NewPos += Delta;
+                            /**/
                             OtherTransform.SetLocation(OtherPosition - Delta);
                         }
                     }
@@ -109,7 +117,7 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 }
                 else if (Distance <= Enemy.AttackRange)
                 {
-                    EnemySubsystem.DamageTarget(0, Enemy.Damage);
+                    EnemySubsystem.DamageTarget(TargetIndex, Enemy.Damage);
                     Enemy.AttackTimer = Enemy.AttackCooldown;
                 }
 

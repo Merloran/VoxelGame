@@ -2,7 +2,6 @@
 
 #include "VoxelGameGameMode.h"
 #include "Character/VoxelGameCharacter.h"
-#include "Enemy/EnemySubsystem.h"
 #include "UObject/ConstructorHelpers.h"
 
 AVoxelGameGameMode::AVoxelGameGameMode()
@@ -17,12 +16,4 @@ AVoxelGameGameMode::AVoxelGameGameMode()
 
 void AVoxelGameGameMode::BeginPlay()
 {
-	UEnemySubsystem* EnemySubsystem = GetWorld()->GetSubsystem<UEnemySubsystem>();
-	UE_LOG(LogTemp, Log, TEXT("ENEMY-SYSTEM BP1"));
-	if (EnemySubsystem)
-	{
-		UE_LOG(LogTemp, Log, TEXT("ENEMY-SYSTEM BP2"));
-		EnemySubsystem->SpawnEnemies();
-	}
-	UE_LOG(LogTemp, Log, TEXT("ENEMY-SYSTEM BP3"));
 }

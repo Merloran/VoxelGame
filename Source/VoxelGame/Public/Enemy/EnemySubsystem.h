@@ -22,6 +22,31 @@
 
 #include "EnemySubsystem.generated.h"
 
+UENUM(BlueprintType)
+enum class EEnemyType : uint8
+{
+	Rat        UMETA(DisplayName = "Rat")
+};
+
+USTRUCT(BlueprintType)
+struct VOXELGAME_API FEnemyData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Speed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float PlayerDetectionRange;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AttackRange;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AttackCooldown;
+};
+
 /**
  * 
  */
@@ -34,7 +59,7 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 	UFUNCTION(BlueprintCallable, Category = "EnemySystem")
-	void SpawnEnemies();
+	void SpawnEnemies(EEnemyType EnemyType, int32 Number, FEnemyData EnemyData, const FVector& MinPositionRange, const FVector& MaxPositionRange);
 
 	UFUNCTION(BlueprintCallable, Category="EnemySystem")
 	void DamageEnemy(UEnemyComponent* Enemy, float Damage);
@@ -42,14 +67,18 @@ public:
 	void DamageTarget(int32 Target, float Damage);
 
 	UPROPERTY(BlueprintReadWrite, Category = "EnemySystem")
-	FVector TargetPosition;
+	int32 PlayerTargetIndex;
 	UPROPERTY(BlueprintReadWrite, Category = "EnemySystem")
-	UHealthComponent* TargetHealth;
+	TArray<UHealthComponent*> Targets;
+	UPROPERTY(BlueprintReadWrite, Category = "EnemySystem")
+	TArray<FVector> TargetsPositions;
 
 private:
 	int16 RegisterEnemyActorTemplate(const TCHAR* ActorBluePrintPath);
 	FMassArchetypeHandle EnemyArchetype;
 	int16 RatTemplateIndex;
+	TArray<int16> EnemyTypes;
+
 
 	UMassEntitySubsystem* EntitySystem;
 	UMassRepresentationSubsystem* RepresentationSubsystem;
