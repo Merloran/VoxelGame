@@ -15,12 +15,14 @@ struct VOXELGAME_API FEnemyFragment : public FMassFragment
 {
     GENERATED_BODY()
 
+    //UPROPERTY()
+    //uint32 Id;
     UPROPERTY()
-    uint32 Id;
-    UPROPERTY()
-    FVector TargetPosition = FVector::ZeroVector;
+    int32 Target;
     UPROPERTY()
     float MoveSpeed = 200.f;
+    UPROPERTY()
+    float PlayerDetectionRange = 200.f;
     UPROPERTY()
     float AttackRange = 200.f;
     UPROPERTY()
@@ -30,21 +32,6 @@ struct VOXELGAME_API FEnemyFragment : public FMassFragment
     UPROPERTY()
     float AttackTimer = 0.f;
 };
-
-/*
- *
- */
-//USTRUCT()
-//struct VOXELGAME_API FEnemyStateFragment : public FMassFragment
-//{
-//    GENERATED_BODY()
-//
-//    UPROPERTY()
-//    uint8 bIsAttacking : 1;
-//
-//    UPROPERTY()
-//    uint8 bIsMoving : 1;
-//};
 
 /*
  * Health fragment - holds current and max HP.

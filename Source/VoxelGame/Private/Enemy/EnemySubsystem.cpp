@@ -22,12 +22,19 @@ void UEnemySubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	EntitySystem = World->GetSubsystem<UMassEntitySubsystem>();
 	EntityManager = &EntitySystem->GetMutableEntityManager();
 	RepresentationSubsystem = World->GetSubsystem<UMassRepresentationSubsystem>();
-	//ActorSubsystem = World->GetSubsystem<UMassActorSubsystem>();
 
 
-	RatTemplateIndex = RegisterEnemyActorTemplate(TEXT("/Game/Enemy/BP_Enemy.BP_Enemy_C"));
-	//TSubclassOf<AActor> RatBPClass = LoadObject<UClass>(nullptr, TEXT("/Game/Enemy/BP_Enemy.BP_Enemy_C"));
-	//RatTemplateIndex = RepresentationSubsystem->FindOrAddTemplateActor(RatBPClass);
+	//RatTemplateIndex = RegisterEnemyActorTemplate(TEXT("/Game/Enemy/BP_Enemy.BP_Enemy_C"));
+	EnemyTypes.Add(RegisterEnemyActorTemplate(TEXT("/Game/Enemy/BP_Enemy.BP_Enemy_C")));
+
+	EnemyArchetype = EntityManager->CreateArchetype({
+		FTransformFragment::StaticStruct(),
+		FEnemyFragment::StaticStruct(),
+		FMassRepresentationFragment::StaticStruct(),
+		FMassRepresentationLODFragment::StaticStruct(),
+		FMassActorFragment::StaticStruct(),
+		FHealthFragment::StaticStruct()
+		});
 }
 
 bool UEnemySubsystem::ShouldCreateSubsystem(UObject* Outer) const
@@ -40,7 +47,6 @@ int16 UEnemySubsystem::RegisterEnemyActorTemplate(const TCHAR* ActorBluePrintPat
 {
 	// Load BP actor class (replace path with your BP path)
 	TSubclassOf<AActor> EnemyBPClass = LoadObject<UClass>(nullptr, ActorBluePrintPath);
-	//TSubclassOf<AActor> EnemyBPClass = LoadObject<UClass>(nullptr, TEXT("/Game/Enemy/BP_Enemy.BP_Enemy_C"));
 	if (!EnemyBPClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ENEMY-SYSTEM EnemySubsystem: couldn't load enemy BP class"));
@@ -52,103 +58,92 @@ int16 UEnemySubsystem::RegisterEnemyActorTemplate(const TCHAR* ActorBluePrintPat
 	return TemplateIndex;
 }
 
-
-/**/
-void UEnemySubsystem::SpawnEnemies() 
+void UEnemySubsystem::SpawnEnemies(EEnemyType EnemyType, int32 Number, FEnemyData EnemyData, const FVector& MinPositionRange, const FVector& MaxPositionRange)
 {
 	UE_LOG(LogTemp, Log, TEXT("ENEMY-SYSTEM SpawnEnemies"));
-	UWorld* World = GetWorld(); 
-	if (!World) return; 
-	//UMassEntitySubsystem* EntitySystem = World->GetSubsystem<UMassEntitySubsystem>();
-	//FMassEntityManager& EntityManager = EntitySystem->GetMutableEntityManager(); 
-	//UMassRepresentationSubsystem* RepresentationSubsystem = World->GetSubsystem<UMassRepresentationSubsystem>(); 
-	UMassActorSubsystem* ActorSubsystem = World->GetSubsystem<UMassActorSubsystem>(); 
-	//if (!RepresentationSubsystem)
-	//{ 
-	//	UE_LOG(LogTemp, Warning, TEXT("RegisterEnemyMeshVisualization: MassRepresentationSubsystem missing")); 
-	//	return;
-	//} 
-	 
-	EnemyArchetype = EntityManager->CreateArchetype({ 
-		FTransformFragment::StaticStruct(),
-		FEnemyFragment::StaticStruct(),
-		FMassRepresentationFragment::StaticStruct(),
-		FMassRepresentationLODFragment::StaticStruct(), 
-		FMassActorFragment::StaticStruct(),
-		FHealthFragment::StaticStruct() 
-	}); 
+	UWorld* World = GetWorld();
+	if (!World) return;
+	UMassActorSubsystem* ActorSubsystem = World->GetSubsystem<UMassActorSubsystem>();
 
-	for (int32 i = 0; i < 20; i++)
+
+	for (int32 i = 0; i < Number; ++i)
 	{
-		FMassEntityHandle Entity = EntityManager->CreateEntity(EnemyArchetype); 
+		FMassEntityHandle Entity = EntityManager->CreateEntity(EnemyArchetype);
 		//Transform 
-		FTransformFragment& Transform = EntityManager->GetFragmentDataChecked<FTransformFragment>(Entity); 
-		Transform.GetMutableTransform().SetLocation(FVector(FMath::RandRange(50, 2000), FMath::RandRange(0, 3800), 0));
+		FTransformFragment& Transform = EntityManager->GetFragmentDataChecked<FTransformFragment>(Entity);
+		Transform.GetMutableTransform().SetLocation(FVector(FMath::RandRange(MinPositionRange.X, MaxPositionRange.X), FMath::RandRange(MinPositionRange.Y, MaxPositionRange.Y), 0));
 		// Enemy logic 
-		FEnemyFragment& Enemy = EntityManager->GetFragmentDataChecked<FEnemyFragment>(Entity); 
-		Enemy.Id = i; 
-		Enemy.TargetPosition = FVector::ZeroVector + FVector(0, 0, 0); 
-		Enemy.MoveSpeed = 100.f; 
-		Enemy.AttackRange = 150.f;
-		Enemy.Damage = 1.f;
-		Enemy.AttackCooldown = 1;
-		FHealthFragment &Health = EntityManager->GetFragmentDataChecked<FHealthFragment>(Entity);
-		Health.MaxHealth = 10.f;
-		Health.Health = 10.f;
+		FEnemyFragment& Enemy = EntityManager->GetFragmentDataChecked<FEnemyFragment>(Entity);
+		//Enemy.Id = i;
+		Enemy.Target = FMath::RandRange(0, Targets.Num() - 1);
+		if (Enemy.Target == PlayerTargetIndex)
+		{
+			if (PlayerTargetIndex)
+			{
+				--Enemy.Target;
+			}
+			else
+			{
+				++Enemy.Target;
+			}
+		}
+		Enemy.MoveSpeed = EnemyData.Speed;
+		Enemy.PlayerDetectionRange = EnemyData.PlayerDetectionRange;
+		Enemy.AttackRange = EnemyData.AttackRange;
+		Enemy.Damage = EnemyData.Damage;
+		Enemy.AttackCooldown = EnemyData.AttackCooldown;
+		FHealthFragment& Health = EntityManager->GetFragmentDataChecked<FHealthFragment>(Entity);
+		Health.MaxHealth = EnemyData.MaxHealth;
+		Health.Health = EnemyData.MaxHealth;
 		// Mass representation fragment (tells Mass how to visualize)
-		FMassRepresentationFragment& Representation = EntityManager->GetFragmentDataChecked<FMassRepresentationFragment>(Entity); 
-		//Representation.CurrentRepresentation = EMassRepresentationType::StaticMeshInstance; 
+		FMassRepresentationFragment& Representation = EntityManager->GetFragmentDataChecked<FMassRepresentationFragment>(Entity);
 		Representation.CurrentRepresentation = EMassRepresentationType::HighResSpawnedActor;
-		Representation.PrevRepresentation = EMassRepresentationType::None; 
-		//Representation.StaticMeshDescHandle = RatHandle; // IMPORTANT 
-		Representation.HighResTemplateActorIndex = RatTemplateIndex; 
-		Representation.PrevTransform = Transform.GetTransform(); 
+		Representation.PrevRepresentation = EMassRepresentationType::None;
+		Representation.HighResTemplateActorIndex = EnemyTypes[(int8)EnemyType];
+		Representation.PrevTransform = Transform.GetTransform();
 		Representation.PrevLODSignificance = -1.0f;
-		
+
 		// LOD fragment (force it visible so instances are added right away)
-		FMassRepresentationLODFragment& LODFragment = EntityManager->GetFragmentDataChecked<FMassRepresentationLODFragment>(Entity); 
-		LODFragment.LOD = EMassLOD::High; 
-		LODFragment.PrevLOD = EMassLOD::Max; 
-		LODFragment.PrevVisibility = EMassVisibility::Max; 
-		LODFragment.LODSignificance = 0.0f; 
+		FMassRepresentationLODFragment& LODFragment = EntityManager->GetFragmentDataChecked<FMassRepresentationLODFragment>(Entity);
+		LODFragment.LOD = EMassLOD::High;
+		LODFragment.PrevLOD = EMassLOD::Max;
+		LODFragment.PrevVisibility = EMassVisibility::Max;
+		LODFragment.LODSignificance = 0.0f;
 
 
-		FMassActorFragment& ActorFragment = EntityManager->GetFragmentDataChecked<FMassActorFragment>(Entity); 
+		FMassActorFragment& ActorFragment = EntityManager->GetFragmentDataChecked<FMassActorFragment>(Entity);
 		if (!ActorFragment.IsValid()) // check if actor already exists 
-		{ 
-			FMassActorPostSpawnDelegate PostSpawnDelegate; 
-			PostSpawnDelegate.BindLambda([ActorSubsystem, &ActorFragment](const FMassActorSpawnRequestHandle& RequestHandle, FConstStructView SpawnRequestView) { 
-				// Try to access the spawn request data 
-				if (SpawnRequestView.IsValid() && SpawnRequestView.GetScriptStruct() == FMassActorSpawnRequest::StaticStruct()) 
-				{ 
-					const FMassActorSpawnRequest& SpawnRequest = SpawnRequestView.Get<const FMassActorSpawnRequest>(); 
+		{
+			FMassActorPostSpawnDelegate PostSpawnDelegate;
+			PostSpawnDelegate.BindLambda([ActorSubsystem, &ActorFragment](const FMassActorSpawnRequestHandle& RequestHandle, FConstStructView SpawnRequestView) {
+				if (SpawnRequestView.IsValid() && SpawnRequestView.GetScriptStruct() == FMassActorSpawnRequest::StaticStruct())
+				{
+					const FMassActorSpawnRequest& SpawnRequest = SpawnRequestView.Get<const FMassActorSpawnRequest>();
 					FMassEntityHandle MassEntity = SpawnRequest.MassAgent;
-					AActor* SpawnedActor = SpawnRequest.SpawnedActor; 
-					if (SpawnedActor) 
+					AActor* SpawnedActor = SpawnRequest.SpawnedActor;
+					if (SpawnedActor)
 					{
-						UE_LOG(LogTemp, Warning, TEXT("ENEMY-SYSTEM Spawned Actor!"));
 						ActorSubsystem->SetHandleForActor(SpawnRequest.SpawnedActor, SpawnRequest.MassAgent);
-						ActorFragment.SetAndUpdateHandleMap(MassEntity, SpawnedActor, true); 
+						ActorFragment.SetAndUpdateHandleMap(MassEntity, SpawnedActor, true);
 						SpawnedActor->FindComponentByClass<UEnemyComponent>()->Entity = MassEntity;
 					}
-					UE_LOG(LogTemp, Warning, TEXT("ENEMY-SYSTEM Spawned Actor finish!"));
-				} 
+				}
 				else
-				{ 
-					UE_LOG(LogTemp, Warning, TEXT("ENEMY-SYSTEM Unexpected struct type in SpawnRequestView!")); 
-				} 
-				return EMassActorSpawnRequestAction::Keep; 
+				{
+					UE_LOG(LogTemp, Warning, TEXT("ENEMY-SYSTEM Unexpected struct type in SpawnRequestView!"));
+				}
+				return EMassActorSpawnRequestAction::Keep;
 				});
-			AActor* SpawnedActor = RepresentationSubsystem->GetOrSpawnActorFromTemplate( 
-				Entity, 
+			AActor* SpawnedActor = RepresentationSubsystem->GetOrSpawnActorFromTemplate(
+				Entity,
 				Transform.GetTransform(),
-				RatTemplateIndex, 
+				RatTemplateIndex,
 				Representation.ActorSpawnRequestHandle,
-				MAX_FLT, 
+				MAX_FLT,
 				FMassActorPreSpawnDelegate(),
 				PostSpawnDelegate);
-		} 
-	} 
+		}
+	}
 }
 
 void UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage)
@@ -173,9 +168,9 @@ void UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage)
 
 void UEnemySubsystem::DamageTarget(int32 Target, float Damage)
 {
-	if (TargetHealth)
+	if (Target < Targets.Num() && Targets[Target])
 	{
-		TargetHealth->TakeDamage(
+		Targets[Target]->TakeDamage(
 			nullptr,
 			Damage,
 			nullptr,
@@ -187,10 +182,3 @@ void UEnemySubsystem::DamageTarget(int32 Target, float Damage)
 			nullptr);
 	}
 }
-
-//void UEnemySubsystem::SetTargetPosition(const FVector& NewTargetPosition)
-//{
-//	TargetPosition = NewTargetPosition;
-//	// You could also iterate all entities and update per-entity FEnemyFragment::TargetPosition here if you want immediate per-entity value change.
-//	UE_LOG(LogTemp, Log, TEXT("EnemySubsystem: SetTargetPosition %s"), *TargetPosition.ToString());
-//}
