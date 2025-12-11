@@ -12,3 +12,8 @@ UEnemyComponent::UEnemyComponent()
 
 	// ...
 }
+
+void UEnemyComponent::Die(EAttackDamageType DamageType)
+{
+	OnEnemyDeath.Broadcast(DamageType);
+}
