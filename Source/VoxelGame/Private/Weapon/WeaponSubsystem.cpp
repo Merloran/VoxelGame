@@ -10,7 +10,7 @@
 UWeaponSubsystem::UWeaponSubsystem()
 {
 	//this->BurnsMap = Texture2D'/Game/Materials/Textures/T_BurnMap76x42_burns.T_BurnMap76x42_burns';
-	static ConstructorHelpers::FObjectFinder<UTexture2D> BurnMapTexObj(TEXT("/Game/Materials/Textures/T_BurnMap76x42x8_R8.T_BurnMap76x42x8_R8"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> BurnMapTexObj(TEXT("/Game/Materials/Textures/T_BurnedMap79x48x8_R8.T_BurnedMap79x48x8_R8"));
 	if (BurnMapTexObj.Object != NULL)
 	{
 		BurnsMap = BurnMapTexObj.Object;
@@ -22,11 +22,12 @@ void UWeaponSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 }
 
-UTexture2D* UWeaponSubsystem::Initialize(UTexture2D* BurnMap, int32 MapWidth, int32 MapLength, int32 MapHeight)
+UTexture2D* UWeaponSubsystem::Initialize(UTexture2D* BurnMap, int32 MapWidth, int32 MapLength, int32 MapHeight, FVector MapOffset)
 {
 	Width = MapWidth;
 	Length = MapLength;
 	Height = MapHeight;
+	Offset = MapOffset;
 
 	FTexture2DMipMap& Mip = BurnsMap->GetPlatformData()->Mips[0];
 	uint8* PixelData = reinterpret_cast<uint8*>(Mip.BulkData.Lock(LOCK_READ_WRITE));
@@ -91,6 +92,7 @@ void UWeaponSubsystem::ProcessCone(FVector Direction, float Radius, FVector Begi
 			for (int32 Z = IndexMinZ; Z <= IndexMaxZ; ++Z)
 			{
 				FVector VoxelCenter(X * 50 + 25, Y * 50 + 25, Z * 50 + 25);
+				//FVector VoxelCenter(X * 50 + 25 + Offset.X, Y * 50 + 25 + Offset.Y, Z * 50 + 25 + Offset.Z);
 				FVector Delta = VoxelCenter - BeginPosition;
 				if (Delta.Length() < Radius)
 				{

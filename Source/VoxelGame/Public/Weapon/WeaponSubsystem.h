@@ -20,7 +20,7 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	UFUNCTION(BlueprintCallable, Category = "WeaponSystem")
 	//UTexture2D* Initialize(UTexture2D* BurnMap);
-	UTexture2D* Initialize(UTexture2D* BurnMap, int32 MapWidth, int32 MapLength, int32 MapHeight);
+	UTexture2D* Initialize(UTexture2D* BurnMap, int32 MapWidth, int32 MapLength, int32 MapHeight, FVector MapOffset);
 	UFUNCTION(BlueprintCallable, Category = "WeaponSystem")
 	void ProcessCone(FVector Direction, float Radius, FVector BeginPosition, float Angle, float Value);
 	UFUNCTION(BlueprintCallable, Category = "WeaponSystem")
@@ -33,5 +33,6 @@ private:
 	int32 Width;
 	int32 Length;
 	int32 Height;
+	FVector Offset;
 	
 };
