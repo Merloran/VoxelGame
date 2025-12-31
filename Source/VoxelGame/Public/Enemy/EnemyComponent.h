@@ -5,8 +5,11 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "MassEntitySubsystem.h"
+#include "Weapon/AttackDamageType.h"
 #include "EnemyComponent.generated.h"
 
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDeath);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, EAttackDamageType, DamageType);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class VOXELGAME_API UEnemyComponent : public UActorComponent
@@ -17,7 +20,12 @@ public:
 	// Sets default values for this component's properties
 	UEnemyComponent();
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnEnemyDeath OnEnemyDeath;
+
 	FMassEntityHandle Entity;
+
+	void Die(EAttackDamageType DamageType);
 
 protected:
 	// Called when the game starts

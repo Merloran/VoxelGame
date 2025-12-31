@@ -2,6 +2,7 @@
 
 #include "Enemy/EnemySubsystem.h"
 
+#include "Enemy/EnemyComponent.h"
 #include "Enemy/EnemyFragment.h"
 #include "Engine/World.h"
 #include "MassCommonFragments.h"
@@ -158,7 +159,15 @@ void UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage)
 		{
 			if (AActor* Actor = ActorFrag.GetMutable())
 			{
-				Actor->Destroy();
+				UEnemyComponent* EnemyComponent = Actor->FindComponentByClass<UEnemyComponent>();
+				if (EnemyComponent)
+				{
+					EnemyComponent->Die(EAttackDamageType::None);
+				}
+				else
+				{
+					Actor->Destroy();
+				}
 			}
 		}
 
