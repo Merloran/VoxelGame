@@ -4,6 +4,8 @@
 #include "Enemy/EnemyFragment.h"
 #include "Enemy/EnemySubsystem.h"
 
+#include "MassEntityExtensions/MassEntityCollisionsSubsystem.h"
+
 #include "MassCommonFragments.h"
 #include "MassRepresentationFragments.h"
 #include "MassActorSubsystem.h"
@@ -31,6 +33,7 @@ void UEnemyProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& Ent
     /* SUBSYSTEMS */
     EntityQuery.AddSubsystemRequirement<UMassRepresentationSubsystem>(EMassFragmentAccess::ReadWrite);
     EntityQuery.AddSubsystemRequirement<UEnemySubsystem>(EMassFragmentAccess::ReadWrite);
+    EntityQuery.AddSubsystemRequirement<UMassEntityCollisionsSubsystem>(EMassFragmentAccess::ReadWrite);
 }
 
 void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
@@ -46,10 +49,13 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
 
             UMassRepresentationSubsystem& RepSubsystem = Context.GetMutableSubsystemChecked<UMassRepresentationSubsystem>();
             UEnemySubsystem& EnemySubsystem = Context.GetMutableSubsystemChecked<UEnemySubsystem>();
+            UMassEntityCollisionsSubsystem& MassEntityCollisionsSubsystem = Context.GetMutableSubsystemChecked<UMassEntityCollisionsSubsystem>();
+            const TArrayView<FBoxCollider> BoxColliders = MassEntityCollisionsSubsystem.GetBoxColliders();
+            const int32 BoxCollidersNum = BoxColliders.Num();
 
             const float DeltaTime = Context.GetDeltaTimeSeconds();
 
-            const float radius = 50.f;
+            const float radius = 25.f;
             const float radius2 = 50.f;
 
             for (int32 i = 0; i < NumEntities; ++i)
@@ -84,7 +90,7 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                     Transform.SetLocation(NewPos);
                 }
 
-
+                /* COLLISIONS */
                 for (int32 j = 0; j < NumEntities; ++j)
                 {
                     FEnemyFragment& OtherEnemy = EnemyList[j];
@@ -99,8 +105,28 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                         {
                             FVector Delta = 0.55f * (radius2 - DifferenceDistance) * Difference;
                             NewPos += Delta;
-                            /**/
                             OtherTransform.SetLocation(OtherPosition - Delta);
+                        }
+                    }
+                }
+
+                for (int32 j = 0; j < BoxCollidersNum; ++j)
+                {
+                    FBoxCollider& BoxCollider = BoxColliders[j];
+                    if (BoxCollider.active)
+                    {
+                        FVector ClampedPosition(
+                            FMath::Clamp(NewPos.X, BoxCollider.back, BoxCollider.front),
+                            FMath::Clamp(NewPos.Y, BoxCollider.left, BoxCollider.right),
+                            FMath::Clamp(NewPos.Z, BoxCollider.down, BoxCollider.up)
+                        );
+                        FVector Difference = NewPos - ClampedPosition;
+                        const float DifferenceDistance = Difference.Size();
+                        Difference.Normalize();
+                        if (DifferenceDistance <= radius)
+                        {
+                            FVector Delta = 1.1 * (radius - DifferenceDistance) * Difference;
+                            NewPos += Delta;
                         }
                     }
                 }
