@@ -58,6 +58,10 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
             const float radius = 25.f;
             const float radius2 = 50.f;
 
+            const float dgmX = 200.f;
+            const float dgmY = 20000.f;
+            float dgf = -dgmX / dgmY;
+
             for (int32 i = 0; i < NumEntities; ++i)
             {
                 FTransform& Transform = TransformList[i].GetMutableTransform();
@@ -77,6 +81,23 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 /* MOVEMENT */
                 FVector Direction = EnemySubsystem.TargetsPositions[TargetIndex] - Current;
                 Direction.Z = 0.0f;
+
+                float expectedDgv = FMath::Sqrt(FMath::Abs(dgmX + dgf * FMath::Abs(Direction.Y)) / dgmX); // Work only if doors are directed in Y axis
+                float achievedDgv = FMath::Abs(Direction.X) / dgmX;
+
+                if (TargetIndex != EnemySubsystem.PlayerTargetIndex && achievedDgv > expectedDgv) 
+                {
+                    // Along street direction
+                    if (Direction.X > 0)
+                    {
+                        Direction = FVector(Direction.Size(), 0.0f, 0.0f);
+                    }
+                    else
+                    {
+                        Direction = FVector(-Direction.Size(), 0.0f, 0.0f);
+                    }
+                }
+
                 //FVector Direction = Enemy.TargetPosition - Current;
                 const float Distance = Direction.Size();
                 FQuat NewRot = Direction.ToOrientationQuat();
