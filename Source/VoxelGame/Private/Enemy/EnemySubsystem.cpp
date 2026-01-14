@@ -147,13 +147,14 @@ void UEnemySubsystem::SpawnEnemies(EEnemyType EnemyType, int32 Number, FEnemyDat
 	}
 }
 
-void UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage)
+float UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage)
 {
 	const FMassEntityHandle& Entity = Enemy->Entity;
 	FHealthFragment& HealthFragment = EntityManager->GetFragmentDataChecked<FHealthFragment>(Entity);
 	HealthFragment.Health -= Damage;
 	if (HealthFragment.Health <= 0.0f)
 	{
+		HealthFragment.Health = 0.0f;
 		FMassActorFragment& ActorFrag = EntityManager->GetFragmentDataChecked<FMassActorFragment>(Entity);
 		if (ActorFrag.IsValid())
 		{
@@ -173,6 +174,8 @@ void UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage)
 
 		EntityManager->DestroyEntity(Entity);
 	}
+
+	return HealthFragment.Health / HealthFragment.MaxHealth;
 }
 
 void UEnemySubsystem::DamageTarget(int32 Target, float Damage)

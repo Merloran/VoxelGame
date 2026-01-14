@@ -62,7 +62,7 @@ public:
 	void SpawnEnemies(EEnemyType EnemyType, int32 Number, FEnemyData EnemyData, const FVector& MinPositionRange, const FVector& MaxPositionRange);
 
 	UFUNCTION(BlueprintCallable, Category="EnemySystem")
-	void DamageEnemy(UEnemyComponent* Enemy, float Damage);
+	float DamageEnemy(UEnemyComponent* Enemy, float Damage);
 	UFUNCTION(BlueprintCallable, Category = "EnemySystem")
 	void DamageTarget(int32 Target, float Damage);
 
