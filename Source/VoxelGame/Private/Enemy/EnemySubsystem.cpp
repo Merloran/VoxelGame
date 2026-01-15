@@ -24,6 +24,7 @@ void UEnemySubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	EntityManager = &EntitySystem->GetMutableEntityManager();
 	RepresentationSubsystem = World->GetSubsystem<UMassRepresentationSubsystem>();
 
+	EnemyDeathMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/MI_Swelling.MI_Swelling"));
 
 	//RatTemplateIndex = RegisterEnemyActorTemplate(TEXT("/Game/Enemy/BP_Enemy.BP_Enemy_C"));
 	EnemyTypes.Add(RegisterEnemyActorTemplate(TEXT("/Game/Enemy/BP_Enemy.BP_Enemy_C")));
