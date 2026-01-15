@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/World.h"
 #include "UObject/Class.h"
+#include "Materials/MaterialInterface.h"
 #include "Subsystems/WorldSubsystem.h"
 
 #include "Character/HealthComponent.h"
@@ -72,6 +73,8 @@ public:
 	TArray<UHealthComponent*> Targets;
 	UPROPERTY(BlueprintReadWrite, Category = "EnemySystem")
 	TArray<FVector> TargetsPositions;
+	UPROPERTY(BlueprintReadWrite, Category = "EnemySystem")
+	UMaterialInterface* EnemyDeathMaterial;
 
 private:
 	int16 RegisterEnemyActorTemplate(const TCHAR* ActorBluePrintPath);
