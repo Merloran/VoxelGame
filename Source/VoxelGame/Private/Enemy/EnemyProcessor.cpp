@@ -98,7 +98,6 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                     }
                 }
 
-                //FVector Direction = Enemy.TargetPosition - Current;
                 const float Distance = Direction.Size();
                 FQuat NewRot = Direction.ToOrientationQuat();
                 Transform.SetRotation(NewRot);
@@ -151,7 +150,8 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                         }
                     }
                 }
-
+                
+                Transform.SetLocation(NewPos);
                 if (AActor* Actor = ActorFrag.GetMutable())
                 {
                     Actor->SetActorLocationAndRotation(NewPos, NewRot);
