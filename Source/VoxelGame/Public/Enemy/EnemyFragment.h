@@ -31,6 +31,8 @@ struct VOXELGAME_API FEnemyFragment : public FMassFragment
     float AttackCooldown = 1.f;
     UPROPERTY()
     float AttackTimer = 0.f;
+    UPROPERTY()
+    float Radius = 25.f;
 };
 
 /*

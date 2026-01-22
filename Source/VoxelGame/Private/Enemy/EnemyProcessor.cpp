@@ -55,8 +55,6 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
 
             const float DeltaTime = Context.GetDeltaTimeSeconds();
 
-            const float radius = 25.f;
-            const float radius2 = 50.f;
 
             const float dgmX = 200.f;
             const float dgmY = 20000.f;
@@ -69,6 +67,9 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 //const FMassRepresentationLODFragment& LOD = LODList[i];
                 //const FMassRepresentationFragment& Representation = RepresentationList[i];
                 FMassActorFragment& ActorFrag = ActorList[i];
+
+                float radius = Enemy.Radius;
+                float radius2 = Enemy.Radius * 2;
 
                 FVector Current = Transform.GetLocation();
                 int32 TargetIndex = Enemy.Target;
