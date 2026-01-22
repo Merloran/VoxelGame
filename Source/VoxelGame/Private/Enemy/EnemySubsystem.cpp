@@ -26,8 +26,10 @@ void UEnemySubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	EnemyDeathMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/MI_Swelling.MI_Swelling"));
 
-	//RatTemplateIndex = RegisterEnemyActorTemplate(TEXT("/Game/Enemy/BP_Enemy.BP_Enemy_C"));
-	EnemyTypes.Add(RegisterEnemyActorTemplate(TEXT("/Game/Enemy/BP_Enemy.BP_Enemy_C")));
+	RatTemplateIndex = RegisterEnemyActorTemplate(TEXT("/Game/Enemy/BP_Enemy.BP_Enemy_C"));
+	RatEliteTemplateIndex = RegisterEnemyActorTemplate(TEXT("/Game/Enemy/BP_Enemy_Elite.BP_Enemy_Elite_C"));
+	EnemyTypes.Add(RatTemplateIndex);
+	EnemyTypes.Add(RatEliteTemplateIndex);
 
 	EnemyArchetype = EntityManager->CreateArchetype({
 		FTransformFragment::StaticStruct(),
@@ -37,6 +39,7 @@ void UEnemySubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		FMassActorFragment::StaticStruct(),
 		FHealthFragment::StaticStruct()
 		});
+		
 }
 
 bool UEnemySubsystem::ShouldCreateSubsystem(UObject* Outer) const
@@ -94,6 +97,7 @@ void UEnemySubsystem::SpawnEnemies(EEnemyType EnemyType, int32 Number, FEnemyDat
 		Enemy.AttackRange = EnemyData.AttackRange;
 		Enemy.Damage = EnemyData.Damage;
 		Enemy.AttackCooldown = EnemyData.AttackCooldown;
+		Enemy.Radius = EnemyData.SizeRadius;
 		FHealthFragment& Health = EntityManager->GetFragmentDataChecked<FHealthFragment>(Entity);
 		Health.MaxHealth = EnemyData.MaxHealth;
 		Health.Health = EnemyData.MaxHealth;
@@ -111,6 +115,19 @@ void UEnemySubsystem::SpawnEnemies(EEnemyType EnemyType, int32 Number, FEnemyDat
 		LODFragment.PrevLOD = EMassLOD::Max;
 		LODFragment.PrevVisibility = EMassVisibility::Max;
 		LODFragment.LODSignificance = 0.0f;
+
+		int16 ActorTemplateIndex;
+		switch (EnemyType) {
+			case EEnemyType::Rat:
+				ActorTemplateIndex = RatTemplateIndex;
+				break;
+			case EEnemyType::RatElite:
+				ActorTemplateIndex = RatEliteTemplateIndex;
+				break;
+			default:
+				ActorTemplateIndex = RatTemplateIndex;
+				break;
+		}
 
 
 		FMassActorFragment& ActorFragment = EntityManager->GetFragmentDataChecked<FMassActorFragment>(Entity);
@@ -139,7 +156,7 @@ void UEnemySubsystem::SpawnEnemies(EEnemyType EnemyType, int32 Number, FEnemyDat
 			AActor* SpawnedActor = RepresentationSubsystem->GetOrSpawnActorFromTemplate(
 				Entity,
 				Transform.GetTransform(),
-				RatTemplateIndex,
+				ActorTemplateIndex,
 				Representation.ActorSpawnRequestHandle,
 				MAX_FLT,
 				FMassActorPreSpawnDelegate(),

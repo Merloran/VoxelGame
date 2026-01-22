@@ -26,7 +26,8 @@
 UENUM(BlueprintType)
 enum class EEnemyType : uint8
 {
-	Rat        UMETA(DisplayName = "Rat")
+	Rat        UMETA(DisplayName = "Rat"),
+	RatElite   UMETA(DisplayName = "RatElite")
 };
 
 USTRUCT(BlueprintType)
@@ -46,6 +47,8 @@ struct VOXELGAME_API FEnemyData
 	float AttackRange;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AttackCooldown;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SizeRadius;
 };
 
 /**
@@ -80,6 +83,7 @@ private:
 	int16 RegisterEnemyActorTemplate(const TCHAR* ActorBluePrintPath);
 	FMassArchetypeHandle EnemyArchetype;
 	int16 RatTemplateIndex;
+	int16 RatEliteTemplateIndex;
 	TArray<int16> EnemyTypes;
 
 
