@@ -21,7 +21,7 @@ UWeaponProcessor::UWeaponProcessor() : EntityQuery(*this)
     bAutoRegisterWithProcessingPhases = true;
 }
 
-void UEnemyProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
+void UWeaponProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
     /* FRAGMENTS */
     EntityQuery.AddRequirement<FHealthFragment>(EMassFragmentAccess::ReadWrite);
@@ -33,7 +33,7 @@ void UEnemyProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& Ent
     EntityQuery.AddSubsystemRequirement<UWeaponSubsystem>(EMassFragmentAccess::ReadWrite);
 }
 
-void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+void UWeaponProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
     EntityQuery.ForEachEntityChunk(Context, [this](FMassExecutionContext& Context)
         {
