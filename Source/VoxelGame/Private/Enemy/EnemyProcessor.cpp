@@ -67,6 +67,7 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 //const FMassRepresentationLODFragment& LOD = LODList[i];
                 //const FMassRepresentationFragment& Representation = RepresentationList[i];
                 FMassActorFragment& ActorFrag = ActorList[i];
+                AActor* Actor = ActorFrag.GetMutable();
 
                 float radius = Enemy.Radius;
                 float radius2 = Enemy.Radius * 2;
@@ -153,7 +154,7 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 }
                 
                 Transform.SetLocation(NewPos);
-                if (AActor* Actor = ActorFrag.GetMutable())
+                if (Actor)
                 {
                     Actor->SetActorLocationAndRotation(NewPos, NewRot);
                 }
@@ -165,6 +166,10 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 }
                 else if (Distance <= Enemy.AttackRange)
                 {
+                    if (Actor)
+                    {
+                        Actor->FindComponentByClass<UEnemyComponent>()->PerformAttack();
+                    }
                     EnemySubsystem.DamageTarget(TargetIndex, Enemy.Damage);
                     Enemy.AttackTimer = Enemy.AttackCooldown;
                 }
