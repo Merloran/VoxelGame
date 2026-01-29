@@ -41,5 +41,6 @@ void UEnemyComponent::PerformAttack()
     if (EnemyAttackAudioComponent && EnemyAttackSound)
     {
         EnemyAttackAudioComponent->Play();
+        OnAttack.Broadcast();
     }
 }
