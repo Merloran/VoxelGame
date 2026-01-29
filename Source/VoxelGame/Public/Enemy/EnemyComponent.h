@@ -3,9 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+/* CORE COMPONENTS */
 #include "Components/ActorComponent.h"
+#include "Components/AudioComponent.h"
+
+#include "Sound/SoundAttenuation.h"
+
+/* MASS ENTITY */
 #include "MassEntitySubsystem.h"
+
+/* WEAPON */
 #include "Weapon/AttackDamageType.h"
+
+
 #include "EnemyComponent.generated.h"
 
 //DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDeath);
@@ -17,6 +28,12 @@ class VOXELGAME_API UEnemyComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Audio")
+	USoundBase* EnemyAttackSound;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Audio")
+	USoundAttenuation* SoundAttenuation;
+
+
 	// Sets default values for this component's properties
 	UEnemyComponent();
 
@@ -26,10 +43,14 @@ public:
 	FMassEntityHandle Entity;
 
 	void Die(EAttackDamageType DamageType);
+	void PerformAttack();
 
 protected:
-	// Called when the game starts
-	//virtual void BeginPlay() override;
+	
+	UPROPERTY()
+	UAudioComponent* EnemyAttackAudioComponent;
+
+	void BeginPlay();
 
 public:	
 	// Called every frame

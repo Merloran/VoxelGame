@@ -27,6 +27,7 @@ void UWeaponProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& En
     EntityQuery.AddRequirement<FHealthFragment>(EMassFragmentAccess::ReadWrite);
     EntityQuery.AddRequirement<FEnemyFragment>(EMassFragmentAccess::ReadWrite);
     EntityQuery.AddRequirement<FMassActorFragment>(EMassFragmentAccess::ReadWrite);
+    EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadWrite);
 
     /* SUBSYSTEMS */
     EntityQuery.AddSubsystemRequirement<UEnemySubsystem>(EMassFragmentAccess::ReadWrite);
