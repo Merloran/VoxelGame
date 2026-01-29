@@ -18,6 +18,8 @@
 #include "MassEntityManager.h"
 #include "MassRepresentationSubsystem.h"
 #include "MassActorSubsystem.h"
+#include "MassEntityQuery.h"
+#include "MassEntitySubsystem.h"
 //#include "MassActorSpawnRequest.h"
 #include "MassRepresentationFragments.h"
 
@@ -69,6 +71,8 @@ public:
 	float DamageEnemy(UEnemyComponent* Enemy, float Damage, EAttackDamageType DamageType, EAttackDamageEffect DamageEffect);
 	UFUNCTION(BlueprintCallable, Category = "EnemySystem")
 	void DamageTarget(int32 Target, float Damage);
+	UFUNCTION(BlueprintCallable, Category = "EnemySystem")
+	void ClearAll();
 
 	UPROPERTY(BlueprintReadWrite, Category = "EnemySystem")
 	int32 PlayerTargetIndex;
@@ -78,6 +82,9 @@ public:
 	TArray<FVector> TargetsPositions;
 	UPROPERTY(BlueprintReadWrite, Category = "EnemySystem")
 	UMaterialInterface* EnemyDeathMaterial;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "EnemySystem")
+	bool IsEnemiesCleared = false;
 
 private:
 	int16 RegisterEnemyActorTemplate(const TCHAR* ActorBluePrintPath);
@@ -91,4 +98,9 @@ private:
 	UMassRepresentationSubsystem* RepresentationSubsystem;
 	//UMassActorSubsystem* ActorSubsystem;
 	FMassEntityManager* EntityManager;
+
+	
+    FMassEntityQuery AllEntityQuery;
+
+
 };

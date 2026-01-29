@@ -55,6 +55,22 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
 
             const float DeltaTime = Context.GetDeltaTimeSeconds();
 
+            if (EnemySubsystem.IsEnemiesCleared)
+            {
+                Context.Defer().DestroyEntities(Context.GetEntities());
+                EnemySubsystem.IsEnemiesCleared = false;
+                return;
+            }
+
+            TArray<int32> availableTargets;
+
+            for (int32 i = 0; i < EnemySubsystem.Targets.Num(); ++i)
+            {
+                if (i != EnemySubsystem.PlayerTargetIndex)
+                {
+                    availableTargets.Add(i);
+                }
+            }
 
             const float dgmX = 200.f;
             const float dgmY = 20000.f;
@@ -73,7 +89,19 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 float radius2 = Enemy.Radius * 2;
 
                 FVector Current = Transform.GetLocation();
+                if (!(EnemySubsystem.Targets[Enemy.Target]))
+                {
+                    if (availableTargets.Num() == 0)
+                    {
+                        Enemy.Target = EnemySubsystem.PlayerTargetIndex;
+                    }
+                    else
+                    {
+                        Enemy.Target = availableTargets[FMath::RandRange(0, availableTargets.Num() - 1)];
+                    }
+                }
                 int32 TargetIndex = Enemy.Target;
+
                 /* PLAYER DETECTION */
                 if ((EnemySubsystem.TargetsPositions[EnemySubsystem.PlayerTargetIndex] - Current).Size() <= Enemy.PlayerDetectionRange)
                 {
