@@ -40,6 +40,10 @@ void UEnemySubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		FHealthFragment::StaticStruct()
 		});
 		
+	// Configuring Query
+	//AllEntityQuery = FMassEntityQuery(EntityManager);
+	//AllEntityQuery.AddRequirement<FEnemyFragment>(EMassFragmentAccess::ReadOnly);
+	////AllEntityQuery.CacheArchetypes(EntityManager);
 }
 
 bool UEnemySubsystem::ShouldCreateSubsystem(UObject* Outer) const
@@ -211,4 +215,16 @@ void UEnemySubsystem::DamageTarget(int32 Target, float Damage)
 			nullptr,
 			nullptr);
 	}
+}
+
+void UEnemySubsystem::ClearAll()
+{
+	//FMassExecutionContext Context(EntityManager, 0.1f, true);
+	//
+	//AllEntityQuery.ForEachEntityChunk(EntityManager, Context,
+	//    [&](FMassExecutionContext& Ctx)
+	//    {
+	//		EntityManager.Defer().DestroyEntities(Ctx.GetEntities());
+	//    });
+	IsEnemiesCleared = true;
 }
