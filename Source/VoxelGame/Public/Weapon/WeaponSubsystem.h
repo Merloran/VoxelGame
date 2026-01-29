@@ -24,6 +24,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "WeaponSystem")
 	void ProcessCone(FVector Direction, float Radius, FVector BeginPosition, float Angle, float Value);
 	UFUNCTION(BlueprintCallable, Category = "WeaponSystem")
+	void ProcessArea(float Radius, FVector ReferencePosition, float Value);
+	UFUNCTION(BlueprintCallable, Category = "WeaponSystem")
 	void UpdateTexture(bool bFreeData = false);
 
 private:

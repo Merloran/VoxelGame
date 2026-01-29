@@ -116,6 +116,49 @@ void UWeaponSubsystem::ProcessCone(FVector Direction, float Radius, FVector Begi
 	Mip.BulkData.Unlock();
 }
 
+void UWeaponSubsystem::ProcessArea(float Radius, FVector ReferencePosition, float Value)
+{
+	const float MinX = ReferencePosition.X - Radius;
+	const float MaxX = ReferencePosition.X + Radius;
+	const float MinY = ReferencePosition.Y - Radius;
+	const float MaxY = ReferencePosition.Y + Radius;
+	const float MinZ = ReferencePosition.Z - Radius;
+	const float MaxZ = ReferencePosition.Z + Radius;
+
+	const int32 IndexMinX = FMath::Clamp((int)(MinX / 50.0f), 0, Width - 1);
+	const int32 IndexMaxX = FMath::Clamp((int)(MaxX / 50.0f), 0, Width - 1);
+	const int32 IndexMinY = FMath::Clamp((int)(MinY / 50.0f), 0, Length - 1);
+	const int32 IndexMaxY = FMath::Clamp((int)(MaxY / 50.0f), 0, Length - 1);
+	const int32 IndexMinZ = FMath::Clamp((int)(MinZ / 50.0f), 0, Height - 1);
+	const int32 IndexMaxZ = FMath::Clamp((int)(MaxZ / 50.0f), 0, Height - 1);
+
+	const uint16 Change = 255 * Value;
+
+	FTexture2DMipMap& Mip = BurnsMap->GetPlatformData()->Mips[0];
+	uint8* PixelData = reinterpret_cast<uint8*>(Mip.BulkData.Lock(LOCK_READ_WRITE));
+
+	for (int32 X = IndexMinX; X <= IndexMaxX; ++X)
+	{
+		for (int32 Y = IndexMinY; Y <= IndexMaxY; ++Y)
+		{
+			for (int32 Z = IndexMinZ; Z <= IndexMaxZ; ++Z)
+			{
+				//FVector VoxelCenter(X * 50 + 25, Y * 50 + 25, Z * 50 + 25);
+				FVector VoxelCenter(X * 50 + 25 + Offset.X, Y * 50 + 25 + Offset.Y, Z * 50 + 25 + Offset.Z);
+				FVector Delta = VoxelCenter - ReferencePosition;
+				if (Delta.Length() < Radius)
+				{
+					size_t Index = ((Y + Z * Length) * Width + X);
+					PixelData[Index] = (uint8)FMath::Min(PixelData[Index] + Change, 255); // B
+				}
+			}
+		}
+	}
+
+	// Unlock & update
+	Mip.BulkData.Unlock();
+}
+
 void UWeaponSubsystem::UpdateTexture(bool bFreeData)
 {
 	BurnsMap->UpdateResource();

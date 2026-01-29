@@ -165,7 +165,7 @@ void UEnemySubsystem::SpawnEnemies(EEnemyType EnemyType, int32 Number, FEnemyDat
 	}
 }
 
-float UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage)
+float UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage, EAttackDamageType DamageType, EAttackDamageEffect DamageEffect)
 {
 	const FMassEntityHandle& Entity = Enemy->Entity;
 	FHealthFragment& HealthFragment = EntityManager->GetFragmentDataChecked<FHealthFragment>(Entity);
@@ -181,7 +181,7 @@ float UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage)
 				UEnemyComponent* EnemyComponent = Actor->FindComponentByClass<UEnemyComponent>();
 				if (EnemyComponent)
 				{
-					EnemyComponent->Die(EAttackDamageType::None);
+					EnemyComponent->Die(EAttackDamageType::NORMAL);
 				}
 				else
 				{
