@@ -19,7 +19,7 @@
 
 #include "EnemyComponent.generated.h"
 
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDeath);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, EAttackDamageType, DamageType);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -39,6 +39,8 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnEnemyDeath OnEnemyDeath;
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnAttack OnAttack;
 
 	FMassEntityHandle Entity;
 
