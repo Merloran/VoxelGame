@@ -24,13 +24,6 @@ void UEnemySubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	EntityManager = &EntitySystem->GetMutableEntityManager();
 	RepresentationSubsystem = World->GetSubsystem<UMassRepresentationSubsystem>();
 
-	EnemyDeathMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/MI_Swelling.MI_Swelling"));
-
-	RatTemplateIndex = RegisterEnemyActorTemplate(TEXT("/Game/Enemy/BP_Enemy.BP_Enemy_C"));
-	RatEliteTemplateIndex = RegisterEnemyActorTemplate(TEXT("/Game/Enemy/BP_Enemy_Elite.BP_Enemy_Elite_C"));
-	EnemyTypes.Add(RatTemplateIndex);
-	EnemyTypes.Add(RatEliteTemplateIndex);
-
 	EnemyArchetype = EntityManager->CreateArchetype({
 		FTransformFragment::StaticStruct(),
 		FEnemyFragment::StaticStruct(),
@@ -52,18 +45,24 @@ bool UEnemySubsystem::ShouldCreateSubsystem(UObject* Outer) const
 	return World && World->IsGameWorld();
 }
 
-int16 UEnemySubsystem::RegisterEnemyActorTemplate(const TCHAR* ActorBluePrintPath)
+int32 UEnemySubsystem::RegisterEnemyActorTemplate(EEnemyType EnemyType, TSubclassOf<AActor> EnemyBPClass)
 {
-	// Load BP actor class (replace path with your BP path)
-	TSubclassOf<AActor> EnemyBPClass = LoadObject<UClass>(nullptr, ActorBluePrintPath);
 	if (!EnemyBPClass)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ENEMY-SYSTEM EnemySubsystem: couldn't load enemy BP class"));
+		UE_LOG(LogTemp, Warning, TEXT("ENEMY-SYSTEM Provided during registration Actor Blueprint class is null"));
 		return -1;
 	}
 
 	int16 TemplateIndex = RepresentationSubsystem->FindOrAddTemplateActor(EnemyBPClass);
-	UE_LOG(LogTemp, Log, TEXT("ENEMY-SYSTEM EnemySubsystem: Registered enemy template index %d"), RatTemplateIndex);
+	UE_LOG(LogTemp, Log, TEXT("ENEMY-SYSTEM EnemySubsystem: Registered enemy template index %d"), TemplateIndex);
+
+	if (EnemyTypes.Num() <= (int32)EnemyType)
+	{
+		EnemyTypes.SetNum((int32)EnemyType + 1);
+	}
+
+	EnemyTypes[(int32)EnemyType] = TemplateIndex;
+
 	return TemplateIndex;
 }
 
@@ -123,13 +122,13 @@ void UEnemySubsystem::SpawnEnemies(EEnemyType EnemyType, int32 Number, FEnemyDat
 		int16 ActorTemplateIndex;
 		switch (EnemyType) {
 			case EEnemyType::Rat:
-				ActorTemplateIndex = RatTemplateIndex;
+				ActorTemplateIndex = EnemyTypes[(int32)EEnemyType::Rat];
 				break;
 			case EEnemyType::RatElite:
-				ActorTemplateIndex = RatEliteTemplateIndex;
+				ActorTemplateIndex = EnemyTypes[(int32)EEnemyType::RatElite];
 				break;
 			default:
-				ActorTemplateIndex = RatTemplateIndex;
+				ActorTemplateIndex = EnemyTypes[(int32)EEnemyType::Rat];
 				break;
 		}
 
