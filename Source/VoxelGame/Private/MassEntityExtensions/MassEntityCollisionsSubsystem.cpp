@@ -6,7 +6,7 @@
 int UMassEntityCollisionsSubsystem::CreateBoxCollider(FVector3f Position, FVector3f Size)
 {
 	FVector3f halfSize = 0.5f * Size;
-	_BoxColliders.Emplace(FBoxCollider {
+	_BoxColliders.Add(FBoxCollider {
 		.id = _NewBoxColliderIndex,
 		.active = true,
 		.front = Position.X + halfSize.X,

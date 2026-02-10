@@ -7,16 +7,6 @@
 #include "Algo/MinElement.h"
 #include "Algo/MaxElement.h"
 
-UWeaponSubsystem::UWeaponSubsystem()
-{
-	//this->BurnsMap = Texture2D'/Game/Materials/Textures/T_BurnMap76x42_burns.T_BurnMap76x42_burns';
-	static ConstructorHelpers::FObjectFinder<UTexture2D> BurnMapTexObj(TEXT("/Game/Materials/Textures/T_BurnedMap79x48x8_R8.T_BurnedMap79x48x8_R8"));
-	if (BurnMapTexObj.Object != NULL)
-	{
-		BurnsMap = BurnMapTexObj.Object;
-	}
-}
-
 void UWeaponSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -28,6 +18,8 @@ UTexture2D* UWeaponSubsystem::Initialize(UTexture2D* BurnMap, int32 MapWidth, in
 	Length = MapLength;
 	Height = MapHeight;
 	Offset = MapOffset;
+
+	BurnsMap = BurnMap;
 
 	FTexture2DMipMap& Mip = BurnsMap->GetPlatformData()->Mips[0];
 	uint8* PixelData = reinterpret_cast<uint8*>(Mip.BulkData.Lock(LOCK_READ_WRITE));
