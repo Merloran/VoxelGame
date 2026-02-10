@@ -16,7 +16,6 @@ class VOXELGAME_API UWeaponSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
-	UWeaponSubsystem();
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	UFUNCTION(BlueprintCallable, Category = "WeaponSystem")
 	//UTexture2D* Initialize(UTexture2D* BurnMap);
@@ -28,10 +27,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "WeaponSystem")
 	void UpdateTexture(bool bFreeData = false);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* BurnsMap;
 private:
 
-	UPROPERTY()
-	UTexture2D* BurnsMap;
 	int32 Width;
 	int32 Length;
 	int32 Height;
