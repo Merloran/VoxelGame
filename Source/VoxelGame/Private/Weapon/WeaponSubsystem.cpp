@@ -22,6 +22,12 @@ UTexture2D* UWeaponSubsystem::Initialize(UTexture2D* BurnMap, int32 MapWidth, in
 	BurnsMap = BurnMap;
 
 	FTexture2DMipMap& Mip = BurnsMap->GetPlatformData()->Mips[0];
+	UE_LOG(LogTemp, Warning, TEXT("Texture Size: %d x %d"),
+		BurnsMap->GetSizeX(),
+		BurnsMap->GetSizeY());
+	check(BurnsMap);
+	check(BurnsMap->GetPlatformData());
+	check(BurnsMap->GetPlatformData()->Mips.Num() > 0);
 	uint8* PixelData = reinterpret_cast<uint8*>(Mip.BulkData.Lock(LOCK_READ_WRITE));
 	const size_t PixelCount = 4 * Width * Length * Height;
 	for (size_t Index = 0; Index < PixelCount; ++Index)
@@ -126,7 +132,15 @@ void UWeaponSubsystem::ProcessArea(float Radius, FVector ReferencePosition, floa
 
 	const uint16 Change = 255 * Value;
 
+	UE_LOG(LogTemp, Warning, TEXT("Texture Size: %d x %d"),
+		BurnsMap->GetSizeX(),
+		BurnsMap->GetSizeY());
+	check(BurnsMap);
+	check(BurnsMap->GetPlatformData());
+	check(BurnsMap->GetPlatformData()->Mips.Num() > 0);
 	FTexture2DMipMap& Mip = BurnsMap->GetPlatformData()->Mips[0];
+	UE_LOG(LogTemp, Warning, TEXT("After Texture Size"))
+	
 	uint8* PixelData = reinterpret_cast<uint8*>(Mip.BulkData.Lock(LOCK_READ_WRITE));
 
 	for (int32 X = IndexMinX; X <= IndexMaxX; ++X)
