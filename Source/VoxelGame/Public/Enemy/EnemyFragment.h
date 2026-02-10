@@ -18,7 +18,7 @@ struct VOXELGAME_API FEnemyFragment : public FMassFragment
     //UPROPERTY()
     //uint32 Id;
     UPROPERTY()
-    int32 Target;
+    int32 Target = -1;
     UPROPERTY()
     float MoveSpeed = 200.f;
     UPROPERTY()
