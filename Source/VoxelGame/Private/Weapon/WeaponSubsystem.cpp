@@ -19,17 +19,21 @@ UTexture2D* UWeaponSubsystem::Initialize(UTexture2D* BurnMap, int32 MapWidth, in
 	Height = MapHeight;
 	Offset = MapOffset;
 
-	BurnsMap = BurnMap;
+	//BurnsMap = BurnMap;
 
-	FTexture2DMipMap& Mip = BurnsMap->GetPlatformData()->Mips[0];
-	uint8* PixelData = reinterpret_cast<uint8*>(Mip.BulkData.Lock(LOCK_READ_WRITE));
-	const size_t PixelCount = 4 * Width * Length * Height;
-	for (size_t Index = 0; Index < PixelCount; ++Index)
-	{
-		PixelData[Index] = 0;
-	}
-	Mip.BulkData.Unlock();
+	BurnsMap = UTexture2D::CreateTransient(Width, Length * Height, PF_G8);
+	BurnsMap->NeverStream = true;
 	BurnsMap->UpdateResource();
+
+	//FTexture2DMipMap& Mip = BurnsMap->GetPlatformData()->Mips[0];
+	//uint8* PixelData = reinterpret_cast<uint8*>(Mip.BulkData.Lock(LOCK_READ_WRITE));
+	//const size_t PixelCount = Width * Length * Height;
+	//for (size_t Index = 0; Index < PixelCount; ++Index)
+	//{
+	//	PixelData[Index] = 0;
+	//}
+	//Mip.BulkData.Unlock();
+	//BurnsMap->UpdateResource();
 
 	return BurnsMap;
 }
