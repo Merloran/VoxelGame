@@ -88,6 +88,11 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 float radius = Enemy.Radius;
                 float radius2 = Enemy.Radius * 2;
 
+                if (Actor)
+                {
+                    Transform.SetLocation(Actor->GetActorLocation());
+                }
+
                 FVector Current = Transform.GetLocation();
                 if (!(EnemySubsystem.Targets[Enemy.Target]))
                 {
