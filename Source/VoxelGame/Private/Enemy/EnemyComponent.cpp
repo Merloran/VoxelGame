@@ -31,6 +31,11 @@ void UEnemyComponent::BeginPlay()
     EnemyAttackAudioComponent->AttenuationSettings = SoundAttenuation;
 }
 
+void UEnemyComponent::CallOnTakenDamage(float RemainingHealthRatio)
+{
+	OnEnemyHealthChanged.Broadcast(RemainingHealthRatio);
+}
+
 void UEnemyComponent::Die(EAttackDamageType DamageType)
 {
 	OnEnemyDeath.Broadcast(DamageType);

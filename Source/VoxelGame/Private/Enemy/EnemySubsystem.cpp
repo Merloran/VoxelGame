@@ -27,6 +27,7 @@ void UEnemySubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	EnemyArchetype = EntityManager->CreateArchetype({
 		FTransformFragment::StaticStruct(),
 		FEnemyFragment::StaticStruct(),
+		FEnemyStatusCondition::StaticStruct(),
 		FMassRepresentationFragment::StaticStruct(),
 		FMassRepresentationLODFragment::StaticStruct(),
 		FMassActorFragment::StaticStruct(),
@@ -170,8 +171,22 @@ void UEnemySubsystem::SpawnEnemies(EEnemyType EnemyType, int32 Number, FEnemyDat
 
 float UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage, EAttackDamageType DamageType, EAttackDamageEffect DamageEffect)
 {
+	const float BurnDamage = 1.0f;
+	const float BurnTime = 1.0f;
+	const float PoisonDamage = 0.5f;
+	const float PoisonTime = 1.0f;
+	const float KnockbackDistance = 1.0f;
+	const float KnockbackTime = 1.0f;
+	const float SlowdownFactor = 1.0f;
+	const float SlowdownTime = 1.0f;
+	const float StunTime = 1.0f;
+	const float TICK = 0.1f;
+	//UE_LOG(LogTemp, Log, TEXT("ENEMY-SYSTEM DAMAGING_ENEMY STATUS CONDITION1: %d"), DamageEffect);
+
 	const FMassEntityHandle& Entity = Enemy->Entity;
 	FHealthFragment& HealthFragment = EntityManager->GetFragmentDataChecked<FHealthFragment>(Entity);
+	FEnemyStatusCondition& EnemyStatusCondition = EntityManager->GetFragmentDataChecked<FEnemyStatusCondition>(Entity);
+	FTransform& Transform = EntityManager->GetFragmentDataChecked<FTransformFragment>(Entity).GetMutableTransform();
 	HealthFragment.Health -= Damage;
 	if (HealthFragment.Health <= 0.0f)
 	{
@@ -184,7 +199,7 @@ float UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage, EAttack
 				UEnemyComponent* EnemyComponent = Actor->FindComponentByClass<UEnemyComponent>();
 				if (EnemyComponent)
 				{
-					EnemyComponent->Die(EAttackDamageType::NORMAL);
+					EnemyComponent->Die(DamageType);
 				}
 				else
 				{
@@ -194,6 +209,53 @@ float UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage, EAttack
 		}
 
 		EntityManager->DestroyEntity(Entity);
+	}
+	else
+	{
+		/* APPLYING DAMAGE EFFECT */
+		//UE_LOG(LogTemp, Log, TEXT("ENEMY-SYSTEM DAMAGING_ENEMY STATUS CONDITION2: %d"), DamageEffect);
+		switch (DamageEffect)
+		{
+			case EAttackDamageEffect::BURN:
+				EnemyStatusCondition.BurnDamage = BurnDamage;
+				if (BurnTime > EnemyStatusCondition.BurnTimer)
+				{
+					EnemyStatusCondition.BurnTimer = BurnTime;
+				}
+				break;
+
+			case EAttackDamageEffect::POISON:
+				EnemyStatusCondition.PoisonDamage = PoisonDamage * HealthFragment.MaxHealth / (PoisonTime / TICK);
+				if (PoisonTime > EnemyStatusCondition.PoisonTimer)
+				{
+					EnemyStatusCondition.PoisonTimer = PoisonTime;
+				}
+				break;
+
+			case EAttackDamageEffect::ELECTROCUTION:
+				break;
+
+			case EAttackDamageEffect::SLEEP:
+				break;
+
+			case EAttackDamageEffect::CONFUSION:
+				break;
+
+			case EAttackDamageEffect::KNOCKBACK:
+				FVector PlayerEnemyDirection = Transform.GetLocation() - TargetsPositions[PlayerTargetIndex];
+				PlayerEnemyDirection.Normalize();
+				EnemyStatusCondition.KnockbackDirection = PlayerEnemyDirection;
+				EnemyStatusCondition.KnockbackVelocity = 2 * KnockbackDistance / KnockbackTime;
+				EnemyStatusCondition.KnockbackDecceleration = -EnemyStatusCondition.KnockbackVelocity / KnockbackTime;
+				break;
+
+			case EAttackDamageEffect::STUN:
+				if (EnemyStatusCondition.StunTimer <= 0.0f && EnemyStatusCondition.StunCooldownTimer <= 0.0f)
+				{
+					EnemyStatusCondition.StunTimer = StunTime;
+				}
+				break;
+		}
 	}
 
 	return HealthFragment.Health / HealthFragment.MaxHealth;
