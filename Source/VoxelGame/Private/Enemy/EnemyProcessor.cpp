@@ -111,18 +111,31 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 int32 TargetIndex = Enemy.Target;
 
                 /* PLAYER DETECTION */
-                if (Enemy.PlayerLoseTimer > 0)
+                float DistanceFromPlayer = (EnemySubsystem.TargetsPositions[EnemySubsystem.PlayerTargetIndex] - Current).Size();
+                if (Enemy.PlayerLoseFocusTimer > 0)
                 {
                     TargetIndex = EnemySubsystem.PlayerTargetIndex;
-                    if (Enemy.PlayerLoseTimer <= 0)
+                    if (Enemy.PlayerLoseFocusTimer <= 0)
                     {
 
                     }
                 }
-                else if ((EnemySubsystem.TargetsPositions[EnemySubsystem.PlayerTargetIndex] - Current).Size() <= Enemy.PlayerDetectionRange)
+                else if (DistanceFromPlayer <= Enemy.PlayerDetectionRange)
                 {
                     TargetIndex = EnemySubsystem.PlayerTargetIndex;
-                } else if (Enemy.PlayerLoseTimer <= 0.0f && (EnemySubsystem.TargetsPositions[EnemySubsystem.PlayerTargetIndex] - Current).Size() > Enemy.PlayerDetectionRange)
+                }
+                else if (Enemy.PlayerLoseFocusTimer <= 0.0f && Enemy.LastTarget == EnemySubsystem.PlayerTargetIndex
+                            && DistanceFromPlayer > Enemy.PlayerLoseFocusRange)
+                {
+                    Enemy.PlayerLoseFocusTimer = Enemy.PlayerLoseFocusTime;
+                }
+                else if (Enemy.LastTarget == EnemySubsystem.PlayerTargetIndex)
+                {
+                    TargetIndex = EnemySubsystem.PlayerTargetIndex;
+                }
+
+                Enemy.LastTarget = TargetIndex;
+
 
                 /* MOVEMENT */
                 FVector Direction;
