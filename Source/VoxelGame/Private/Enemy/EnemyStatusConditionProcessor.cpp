@@ -59,6 +59,7 @@ void UEnemyStatusConditionProcessor::Execute(FMassEntityManager& EntityManager, 
                 FMassActorFragment& ActorFrag = ActorList[i];
                 AActor* Actor = ActorFrag.GetMutable();
                 float Damage = 0.0f;
+                EAttackDamageEffect DamageEffect = EAttackDamageEffect::NONE;
 
                 /* BURN */
                 if (EnemyStatusCondition.BurnTimer > 0) 
@@ -69,6 +70,7 @@ void UEnemyStatusConditionProcessor::Execute(FMassEntityManager& EntityManager, 
                         EnemyStatusCondition.BurnTickTimer -= 0.1f;
                         EnemyStatusCondition.BurnTimer -= 0.1f;
                         Damage += EnemyStatusCondition.BurnDamage;
+                        DamageEffect = EAttackDamageEffect::BURN;
                     }
                 }
 
@@ -81,6 +83,7 @@ void UEnemyStatusConditionProcessor::Execute(FMassEntityManager& EntityManager, 
                         EnemyStatusCondition.PoisonTickTimer -= 0.1f;
                         EnemyStatusCondition.PoisonTimer -= 0.1f;
                         Damage += EnemyStatusCondition.PoisonDamage;
+                        DamageEffect = EAttackDamageEffect::POISON;
                     }
                 }
 
@@ -93,7 +96,7 @@ void UEnemyStatusConditionProcessor::Execute(FMassEntityManager& EntityManager, 
 				    {
                         if (Health.Health <= 0.f)
                         {
-				            EnemyComponent->Die(EAttackDamageType::None);
+				            EnemyComponent->Die(EAttackDamageType::None, DamageEffect);
                         }
                         else
                         {

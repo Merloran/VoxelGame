@@ -15,12 +15,13 @@
 
 /* WEAPON */
 #include "Weapon/AttackDamageType.h"
+#include "Weapon/DamageData.h"
 
 
 #include "EnemyComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, EAttackDamageType, DamageType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, FDamageData, DamageData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, RemainingHealthRatio);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -48,7 +49,7 @@ public:
 	FMassEntityHandle Entity;
 	
 	void CallOnTakenDamage(float RemainingHealthRatio);
-	void Die(EAttackDamageType DamageType);
+	void Die(EAttackDamageType DamageType, EAttackDamageEffect DamageEffect);
 	void PerformAttack();
 
 protected:

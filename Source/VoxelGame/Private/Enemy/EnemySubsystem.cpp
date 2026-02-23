@@ -199,7 +199,7 @@ float UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage, EAttack
 				UEnemyComponent* EnemyComponent = Actor->FindComponentByClass<UEnemyComponent>();
 				if (EnemyComponent)
 				{
-					EnemyComponent->Die(DamageType);
+					EnemyComponent->Die(DamageType, DamageEffect);
 				}
 				else
 				{

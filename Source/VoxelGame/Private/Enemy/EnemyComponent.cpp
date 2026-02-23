@@ -36,9 +36,12 @@ void UEnemyComponent::CallOnTakenDamage(float RemainingHealthRatio)
 	OnEnemyHealthChanged.Broadcast(RemainingHealthRatio);
 }
 
-void UEnemyComponent::Die(EAttackDamageType DamageType)
+void UEnemyComponent::Die(EAttackDamageType DamageType, EAttackDamageEffect DamageEffect)
 {
-	OnEnemyDeath.Broadcast(DamageType);
+    FDamageData DamageData;
+    DamageData.DamageType = DamageType;
+    DamageData.DamageEffect = DamageEffect;
+	OnEnemyDeath.Broadcast(DamageData);
 }
 
 void UEnemyComponent::PerformAttack()
