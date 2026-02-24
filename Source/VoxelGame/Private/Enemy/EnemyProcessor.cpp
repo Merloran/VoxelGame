@@ -26,6 +26,7 @@ void UEnemyProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& Ent
     /* FRAGMENTS */
     EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadWrite);
     EntityQuery.AddRequirement<FEnemyFragment>(EMassFragmentAccess::ReadWrite);
+    EntityQuery.AddRequirement<FEnemyStatusCondition>(EMassFragmentAccess::ReadWrite);
     EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadWrite);
     EntityQuery.AddRequirement<FMassRepresentationLODFragment>(EMassFragmentAccess::ReadWrite);
     EntityQuery.AddRequirement<FMassActorFragment>(EMassFragmentAccess::ReadWrite);
@@ -43,6 +44,7 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
             const int32 NumEntities = Context.GetNumEntities();
             const TArrayView<FTransformFragment> TransformList = Context.GetMutableFragmentView<FTransformFragment>();
             const TArrayView<FEnemyFragment> EnemyList = Context.GetMutableFragmentView<FEnemyFragment>();
+            const TArrayView<FEnemyStatusCondition> EnemyStatusConditionList = Context.GetMutableFragmentView<FEnemyStatusCondition>();
             //const TArrayView<FMassRepresentationFragment> RepresentationList = Context.GetMutableFragmentView<FMassRepresentationFragment>();
             //const TConstArrayView<FMassRepresentationLODFragment> LODList = Context.GetFragmentView<FMassRepresentationLODFragment>();
             const TArrayView<FMassActorFragment> ActorList = Context.GetMutableFragmentView<FMassActorFragment>();
@@ -80,6 +82,7 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
             {
                 FTransform& Transform = TransformList[i].GetMutableTransform();
                 FEnemyFragment& Enemy = EnemyList[i];
+                FEnemyStatusCondition& EnemyStatusCondition = EnemyStatusConditionList[i];
                 //const FMassRepresentationLODFragment& LOD = LODList[i];
                 //const FMassRepresentationFragment& Representation = RepresentationList[i];
                 FMassActorFragment& ActorFrag = ActorList[i];
@@ -87,6 +90,11 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
 
                 float radius = Enemy.Radius;
                 float radius2 = Enemy.Radius * 2;
+
+                if (Actor)
+                {
+                    Transform.SetLocation(Actor->GetActorLocation());
+                }
 
                 FVector Current = Transform.GetLocation();
                 if (!(EnemySubsystem.Targets[Enemy.Target]))
@@ -103,33 +111,76 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 int32 TargetIndex = Enemy.Target;
 
                 /* PLAYER DETECTION */
-                if ((EnemySubsystem.TargetsPositions[EnemySubsystem.PlayerTargetIndex] - Current).Size() <= Enemy.PlayerDetectionRange)
+                float DistanceFromPlayer = (EnemySubsystem.TargetsPositions[EnemySubsystem.PlayerTargetIndex] - Current).Size();
+                if (Enemy.PlayerLoseFocusTimer > 0)
+                {
+                    TargetIndex = EnemySubsystem.PlayerTargetIndex;
+                    if (Enemy.PlayerLoseFocusTimer <= 0)
+                    {
+
+                    }
+                }
+                else if (DistanceFromPlayer <= Enemy.PlayerDetectionRange)
+                {
+                    TargetIndex = EnemySubsystem.PlayerTargetIndex;
+                }
+                else if (Enemy.PlayerLoseFocusTimer <= 0.0f && Enemy.LastTarget == EnemySubsystem.PlayerTargetIndex
+                            && DistanceFromPlayer > Enemy.PlayerLoseFocusRange)
+                {
+                    Enemy.PlayerLoseFocusTimer = Enemy.PlayerLoseFocusTime;
+                }
+                else if (Enemy.LastTarget == EnemySubsystem.PlayerTargetIndex)
                 {
                     TargetIndex = EnemySubsystem.PlayerTargetIndex;
                 }
 
+                Enemy.LastTarget = TargetIndex;
+
+
                 /* MOVEMENT */
-                FVector Direction = EnemySubsystem.TargetsPositions[TargetIndex] - Current;
-                Direction.Z = 0.0f;
-
-                float expectedDgv = FMath::Sqrt(FMath::Abs(dgmX + dgf * FMath::Abs(Direction.Y)) / dgmX); // Work only if doors are directed in Y axis
-                float achievedDgv = FMath::Abs(Direction.X) / dgmX;
-
-                if (TargetIndex != EnemySubsystem.PlayerTargetIndex && achievedDgv > expectedDgv) 
+                FVector Direction;
+                FQuat NewRot;
+                float Distance;
+                
+                /* APPLYING STUN */
+                if (EnemyStatusCondition.StunTimer <= 0.0f && EnemyStatusCondition.KnockbackVelocity <= 0.0f)
                 {
-                    // Along street direction
-                    if (Direction.X > 0)
+                    Direction = EnemySubsystem.TargetsPositions[TargetIndex] - Current;
+                    Direction.Z = 0.0f;
+
+                    float expectedDgv = FMath::Sqrt(FMath::Abs(dgmX + dgf * FMath::Abs(Direction.Y)) / dgmX); // Work only if doors are directed in Y axis
+                    float achievedDgv = FMath::Abs(Direction.X) / dgmX;
+
+                    if (TargetIndex != EnemySubsystem.PlayerTargetIndex && achievedDgv > expectedDgv) 
                     {
-                        Direction = FVector(Direction.Size(), 0.0f, 0.0f);
+                        // Along street direction
+                        if (Direction.X > 0)
+                        {
+                            Direction = FVector(Direction.Size(), 0.0f, 0.0f);
+                        }
+                        else
+                        {
+                            Direction = FVector(-Direction.Size(), 0.0f, 0.0f);
+                        }
                     }
-                    else
+                    NewRot = Direction.ToOrientationQuat();
+                    Distance = Direction.Size();
+
+                    /* APPPLYING SLOWDOWN */
+                    if (EnemyStatusCondition.SlowdownTimer > 0.0f)
                     {
-                        Direction = FVector(-Direction.Size(), 0.0f, 0.0f);
+                        Distance *= EnemyStatusCondition.SlowdownFactor;
                     }
                 }
+                /* APPLYING KNOCKBACK */
+                if (EnemyStatusCondition.KnockbackVelocity > 0.0f)
+                {
+                    Direction = EnemyStatusCondition.KnockbackDirection * EnemyStatusCondition.KnockbackVelocity;
+                    EnemyStatusCondition.KnockbackVelocity += EnemyStatusCondition.KnockbackDecceleration;
+                    NewRot = (-Direction).ToOrientationQuat();
+                    Distance = Direction.Size();
+                }
 
-                const float Distance = Direction.Size();
-                FQuat NewRot = Direction.ToOrientationQuat();
                 Transform.SetRotation(NewRot);
                 FVector NewPos = Current;
 
@@ -188,19 +239,29 @@ void UEnemyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionC
                 }
 
                 /* ATTACKING */
-                if (Enemy.AttackTimer > 0.0f)
+                if (EnemyStatusCondition.StunTimer <= 0.0f)
                 {
-                    Enemy.AttackTimer -= DeltaTime;
-                }
-                else if (Distance <= Enemy.AttackRange)
-                {
-                    if (Actor)
+                    if (Enemy.AttackTimer > 0.0f)
                     {
-                        Actor->FindComponentByClass<UEnemyComponent>()->PerformAttack();
+                        Enemy.AttackTimer -= DeltaTime;
                     }
-                    EnemySubsystem.DamageTarget(TargetIndex, Enemy.Damage);
-                    Enemy.AttackTimer = Enemy.AttackCooldown;
+                    else if (Distance <= Enemy.AttackRange)
+                    {
+                        if (Actor)
+                        {
+                            Actor->FindComponentByClass<UEnemyComponent>()->PerformAttack();
+                        }
+                        EnemySubsystem.DamageTarget(TargetIndex, Enemy.Damage);
+                        Enemy.AttackTimer = Enemy.AttackCooldown;
+                    }
                 }
+
+                /* STATUS EFFECT COUNTDOW */
+                if (EnemyStatusCondition.StunTimer > 0.0f)
+                {
+                    EnemyStatusCondition.StunTimer -= DeltaTime;
+                }
+
 
                 // Debug
                 //DrawDebugSphere(Context.GetWorld(), Transform.GetLocation(), 20.f, 8, (Dist < Enemy.AttackRange) ? FColor::Red : FColor::Green, false, 0.1f);

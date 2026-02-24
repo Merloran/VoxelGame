@@ -15,12 +15,14 @@
 
 /* WEAPON */
 #include "Weapon/AttackDamageType.h"
+#include "Weapon/DamageData.h"
 
 
 #include "EnemyComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, EAttackDamageType, DamageType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, FDamageData, DamageData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, RemainingHealthRatio);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class VOXELGAME_API UEnemyComponent : public UActorComponent
@@ -38,13 +40,16 @@ public:
 	UEnemyComponent();
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnHealthChanged OnEnemyHealthChanged;
+	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnEnemyDeath OnEnemyDeath;
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAttack OnAttack;
 
 	FMassEntityHandle Entity;
-
-	void Die(EAttackDamageType DamageType);
+	
+	void CallOnTakenDamage(float RemainingHealthRatio);
+	void Die(EAttackDamageType DamageType, EAttackDamageEffect DamageEffect);
 	void PerformAttack();
 
 protected:
