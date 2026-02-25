@@ -3,7 +3,7 @@
 
 UExperienceComponent::UExperienceComponent()
 	: OwnedExperience(0)
-	, Level(0)
+	, Level(1)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	SphereRadius = 200.0f;
@@ -34,15 +34,15 @@ void UExperienceComponent::ResetLevel()
 
 float UExperienceComponent::GetExperienceProgress() const
 {
-	int64 experienceForCurrentLevel = EXPERIENCE_FOR_FIRST_LEVEL * int64(1) << (Level - 1);
-	int64 experienceForNextLevel = EXPERIENCE_FOR_FIRST_LEVEL * int64(1) << Level;
+    int64 experienceForCurrentLevel = (Level == 1) ? 0 : EXPERIENCE_FOR_FIRST_LEVEL * int64(1) << (Level - 2);
+    int64 experienceForNextLevel = EXPERIENCE_FOR_FIRST_LEVEL * int64(1) << (Level - 1);
 
-	if (experienceForNextLevel == experienceForCurrentLevel)
-	{
-		return 1.0f;
-	}
+    if (experienceForNextLevel == experienceForCurrentLevel)
+    {
+        return 1.0f;
+    }
 
-	return float(OwnedExperience - experienceForCurrentLevel) / float(experienceForNextLevel - experienceForCurrentLevel);
+    return float(OwnedExperience - experienceForCurrentLevel) / float(experienceForNextLevel - experienceForCurrentLevel);
 }
 
 void UExperienceComponent::BeginPlay()
@@ -64,11 +64,19 @@ void UExperienceComponent::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedC
 
 void UExperienceComponent::UpdateLevel()
 {
-	int32 previousLevel = Level;
-	Level = FMath::Log2(double(int64(OwnedExperience * 2 / EXPERIENCE_FOR_FIRST_LEVEL)));
+    int32 previousLevel = Level;
 
-	if (Level > previousLevel)
-	{
-		OnLevelUp.Broadcast();
-	}
+    if (OwnedExperience < EXPERIENCE_FOR_FIRST_LEVEL)
+    {
+        Level = 1;
+    }
+    else
+    {
+        Level = FMath::FloorToInt(FMath::Log2(double(OwnedExperience) / double(EXPERIENCE_FOR_FIRST_LEVEL))) + 2;
+    }
+
+    if (Level > previousLevel)
+    {
+        OnLevelUp.Broadcast();
+    }
 }
