@@ -174,7 +174,7 @@ float UEnemySubsystem::DamageEnemy(UEnemyComponent* Enemy, float Damage, EAttack
 	const float BurnDamage = 1.0f;
 	const float BurnTime = 1.0f;
 	const float PoisonDamage = 0.5f;
-	const float PoisonTime = 1.0f;
+	const float PoisonTime = 2.0f;
 	const float KnockbackDistance = 1.0f;
 	const float KnockbackTime = 1.0f;
 	const float SlowdownFactor = 1.0f;
