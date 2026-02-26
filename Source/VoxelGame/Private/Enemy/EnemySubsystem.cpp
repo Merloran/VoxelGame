@@ -98,6 +98,8 @@ void UEnemySubsystem::SpawnEnemies(EEnemyType EnemyType, int32 Number, FEnemyDat
 		}
 		Enemy.MoveSpeed = EnemyData.Speed;
 		Enemy.PlayerDetectionRange = EnemyData.PlayerDetectionRange;
+		Enemy.PlayerLoseFocusRange = EnemyData.PlayerLoseFocusRange;
+		Enemy.PlayerLoseFocusTime = EnemyData.PlayerLoseFocusTime;
 		Enemy.AttackRange = EnemyData.AttackRange;
 		Enemy.Damage = EnemyData.Damage;
 		Enemy.AttackCooldown = EnemyData.AttackCooldown;

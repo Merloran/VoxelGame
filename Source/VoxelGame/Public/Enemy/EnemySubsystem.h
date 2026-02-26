@@ -42,6 +42,10 @@ struct VOXELGAME_API FEnemyData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float PlayerDetectionRange;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float PlayerLoseFocusRange;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float PlayerLoseFocusTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Damage;
